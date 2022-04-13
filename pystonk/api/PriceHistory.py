@@ -13,6 +13,8 @@ class PriceHistory(LoggerMixin):
     ENDPOINT = "https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory"
 
     def __init__(self, api_key: str):
+        if not api_key:
+            raise ValueError(f"{self.__class__.__name__}:Invalid API Key : {api_key}")
         self._api_key = api_key
 
     def _buildResponse(self, candlesticks: List[Dict[str, Any]], frequency_type: FrequencyType) -> List[CandleStick]:
