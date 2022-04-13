@@ -35,5 +35,4 @@ pystonk_pcr {stock symbol} {percent threshold}
 
 ## TODO
 - Docker
-- Tests
 - Kivy desktop app

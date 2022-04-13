@@ -14,7 +14,7 @@ class PriceHistory(LoggerMixin):
 
     def __init__(self, api_key: str):
         if not api_key:
-            raise ValueError(f"{self.__class__.__name__}:Invalid API Key : {api_key}")
+            raise ValueError(f"[{self.__class__.__name__}] Invalid API Key : {api_key}")
         self._api_key = api_key
 
     def _buildResponse(self, candlesticks: List[Dict[str, Any]], frequency_type: FrequencyType) -> List[CandleStick]:
@@ -24,7 +24,7 @@ class PriceHistory(LoggerMixin):
             period_type: PeriodType = PeriodType.YTD,
             period: int = 1,
             frequency_type: FrequencyType = FrequencyType.DAILY,
-            frequency = 1) -> List[CandleStick]:
+            frequency: int = 1) -> List[CandleStick]:
         params = {
             'apikey': self._api_key,
             'periodType': period_type.value,
@@ -47,7 +47,7 @@ class PriceHistory(LoggerMixin):
             end: datetime,
             period_type: PeriodType = PeriodType.YTD,
             frequency_type: FrequencyType = FrequencyType.DAILY,
-            frequency = 1) -> List[CandleStick]:
+            frequency: int = 1) -> List[CandleStick]:
         params = {
             'apikey': self._api_key,
             'periodType': period_type.value,

@@ -23,11 +23,14 @@ setup(
     package_data={'pyanoled': ['conf/*.conf']},
     install_requires=[
         "argparse",
-        "numpy",
         "pyhocon",
         "requests",
         "termcolor",
         "wheel"
+    ],
+    tests_require=[
+        "coverage",
+        "mock"
     ],
     entry_points={
         'console_scripts': [
