@@ -26,11 +26,13 @@ setup(
         "numpy",
         "pyhocon",
         "requests",
+        "termcolor",
         "wheel"
     ],
     entry_points={
         'console_scripts': [
-            'pystonk = pystonk.__main__:main'
+            'pystonk_pcr = pystonk.__main__:weekly_price_change_report',
+            'pystonk_or = pystonk.__main__:weekly_options_report',
         ]
     }
 )
