@@ -1,5 +1,5 @@
-from pystonk.api.types.FrequencyType import FrequencyType
-from pystonk.common.models.CandleStick import CandleStick
+from pystonk.api.Types import FrequencyType
+from pystonk.models.CandleStick import CandleStick
 
 from datetime import datetime
 from unittest import TestCase

@@ -1,8 +1,7 @@
 from pystonk.api.PriceHistory import PriceHistory
-from pystonk.api.types.FrequencyType import FrequencyType
-from pystonk.api.types.PeriodType import PeriodType
-from pystonk.common.LoggerMixin import LoggerMixin
-from pystonk.common.models.CandleStick import CandleStick
+from pystonk.api.Types import FrequencyType, PeriodType
+from pystonk.models.CandleStick import CandleStick
+from pystonk.utils.LoggerMixin import LoggerMixin
 
 from itertools import groupby
 from typing import Any, Generator, List, Optional, Tuple

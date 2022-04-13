@@ -1,12 +1,10 @@
-from pystonk.api.types.FrequencyType import FrequencyType
-from pystonk.api.types.PeriodType import PeriodType
-from pystonk.common.models.CandleStick import CandleStick
+from pystonk.api.Types import FrequencyType
+from pystonk.models.CandleStick import CandleStick
 from pystonk.reports.WeeklyPriceChangeReport import WeeklyPriceChangeReport
 
 
 from datetime import datetime
-from mock import MagicMock, patch
-from typing import List
+from mock import MagicMock
 from unittest import TestCase
 
 

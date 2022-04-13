@@ -1,7 +1,6 @@
-from pystonk.api.types.PeriodType import PeriodType
-from pystonk.api.types.FrequencyType import FrequencyType
-from pystonk.common.LoggerMixin import LoggerMixin
-from pystonk.common.models.CandleStick import CandleStick
+from pystonk.api import API
+from pystonk.api.Types import PeriodType, FrequencyType
+from pystonk.models.CandleStick import CandleStick
 
 from datetime import datetime
 from typing import Any, Dict, List
@@ -9,13 +8,11 @@ from typing import Any, Dict, List
 import requests
 
 
-class PriceHistory(LoggerMixin):
+class PriceHistory(API):
     ENDPOINT = "https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory"
 
     def __init__(self, api_key: str):
-        if not api_key:
-            raise ValueError(f"[{self.__class__.__name__}] Invalid API Key : {api_key}")
-        self._api_key = api_key
+        super().__init__(api_key)
 
     def _buildResponse(self, candlesticks: List[Dict[str, Any]], frequency_type: FrequencyType) -> List[CandleStick]:
         return [CandleStick(data['open'], data['high'], data['low'], data['close'], data['volume'], data['datetime'], frequency_type) for data in candlesticks]

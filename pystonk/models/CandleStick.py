@@ -1,6 +1,7 @@
-from pystonk.api.types.FrequencyType import FrequencyType
+from pystonk.api.Types import FrequencyType
 
 from datetime import datetime
+
 
 class CandleStick(object):
     def __init__(self,
