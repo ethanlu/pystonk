@@ -1,4 +1,4 @@
-from pystonk.api.PriceHistory import PriceHistory
+from pystonk.api.PriceHistoryApi import PriceHistoryApi
 from pystonk.api.Types import FrequencyType, PeriodType
 from pystonk.models.CandleStick import CandleStick
 from pystonk.utils.LoggerMixin import LoggerMixin
@@ -8,7 +8,7 @@ from typing import Any, Generator, List, Optional, Tuple
 
 
 class WeeklyPriceChangeReport(LoggerMixin):
-    def __init__(self, api: PriceHistory):
+    def __init__(self, api: PriceHistoryApi):
         self._api = api
         self._candlesticks: List[CandleStick] = []
 

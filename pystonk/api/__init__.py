@@ -1,7 +1,7 @@
 from pystonk.utils.LoggerMixin import LoggerMixin
 
 
-class API(LoggerMixin):
+class Api(LoggerMixin):
     def __init__(self, api_key: str):
         if not api_key:
             raise ValueError(f"Invalid API Key : {api_key}")

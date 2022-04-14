@@ -1,4 +1,4 @@
-from pystonk.api import API
+from pystonk.api import Api
 from pystonk.api.Types import PeriodType, FrequencyType
 from pystonk.models.CandleStick import CandleStick
 
@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 import requests
 
 
-class PriceHistory(API):
+class PriceHistoryApi(Api):
     ENDPOINT = "https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory"
 
     def __init__(self, api_key: str):

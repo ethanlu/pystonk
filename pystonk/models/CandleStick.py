@@ -1,4 +1,5 @@
 from pystonk.api.Types import FrequencyType
+from pystonk.utils import percent_diff
 
 from datetime import datetime
 
@@ -19,7 +20,7 @@ class CandleStick(object):
         self._volume = volume
         self._start_datetime = datetime.fromtimestamp(start_datetime / 1000)
         self._frequency_type = frequency_type
-        self._percent_change = round(((self._close_price - self._open_price) / self._open_price) * 100, 2)
+        self._percent_change = percent_diff(self._open_price, self._close_price)
 
     @property
     def openPrice(self) -> float:
