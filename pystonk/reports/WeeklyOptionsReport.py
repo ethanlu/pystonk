@@ -15,7 +15,7 @@ class WeeklyOptionsReport(LoggerMixin):
         self._mark = None
         self._options_chain: Dict[str, Tuple[OptionContract, OptionContract]] = {}
 
-    def retrieveData(self, symbol: str) -> None:
+    def retrieveData(self, symbol: str) -> bool:
         symbol = symbol.upper()
 
         # get last known price
@@ -28,6 +28,8 @@ class WeeklyOptionsReport(LoggerMixin):
             strike_count=200
         )
 
+        return len(self._options_chain) > 0
+
     def generate(self) -> Generator[Tuple[str, float, OptionContract, OptionContract], Any, None]:
         '''
         generator that returns options chain for given symbol as a tuple of strike price, % change of strike price to market price, call option, and put option
@@ -38,17 +40,17 @@ class WeeklyOptionsReport(LoggerMixin):
     def getMark(self) -> float:
         return self._mark
 
-    def getStrikePricesForTargetPremium(self, premium: float, sell: bool = True) -> Tuple[Tuple[OptionContract, float, float], Tuple[OptionContract, float, float]]:
+    def getStrikePricesForTargetPremium(self, premium: float, is_sell: bool = True) -> Tuple[Tuple[OptionContract, float, float], Tuple[OptionContract, float, float]]:
         premium = round(premium, 2)
         target_call = None
         target_put = None
         for strike_price, percent_change, call_option, put_option in self.generate():
-            call_price = call_option.ask if sell else call_option.bid
-            put_price = put_option.ask if sell else put_option.bid
+            call_price = call_option.bid if is_sell else call_option.ask
+            put_price = put_option.bid if is_sell else put_option.ask
 
             if call_price >= premium:
                 target_call = (call_option, round(float(strike_price) - self._mark, 2), percent_change)
             if put_price <= premium:
-                target_put = (put_option, round(self._mark - float(strike_price), 2), percent_change)
+                target_put = (put_option, round(float(strike_price) - self._mark, 2), percent_change)
 
         return (target_call, target_put)
