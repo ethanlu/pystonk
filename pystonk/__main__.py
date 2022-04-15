@@ -76,11 +76,6 @@ def weekly_options_report():
         if not args.premium:
             raise ValueError("Invalid premium : {args.premium}")
 
-        # show results on cli
-        print("\n")
-        print(f"Symbol : {args.symbol}")
-        print(f"Premium : {args.premium}")
-
         c = ocr.retrieveData(args.symbol)
         if c:
             print("\t%8s   %8s   %12s   %8s   %8s   %8s" % ("Call Bid", "Call Ask", "Strike Price", "% Change", "Put Bid", "Put Ask",))
@@ -95,12 +90,20 @@ def weekly_options_report():
                 ))
             print("\t%8s   %8s   %12s   %8s   %8s   %8s\n" % ("Call Bid", "Call Ask", "Strike Price", "% Change", "Put Bid", "Put Ask",))
 
-            (target_call, call_diff, call_percent_change), (target_put, put_diff, put_percent_change) = ocr.getStrikePricesForTargetPremium(args.premium)
-            print(f"\t${args.premium} premium call strike target / change / % change : {format_colored_number(target_call.strikePrice, ocr.getMark())} / {format_colored_number(call_diff, 0)} / {format_colored_number(call_percent_change, 0)}")
-            print(f"\t${args.premium} premium put strike target / change / % change  : {format_colored_number(target_put.strikePrice, ocr.getMark())} / {format_colored_number(put_diff, 0)} / {format_colored_number(put_percent_change, 0)}")
-            print(f"\t${args.premium} premium call/put strike targets skew : {format_colored_number(call_diff + put_diff, 0)}")
+            # show results on cli
+            print(f"\tSymbol : {args.symbol}")
+            print(f"\tTarget premium : {args.premium}")
+
+            targets = ocr.getStrikePricesForTargetPremium(args.premium)
+            if targets:
+                (target_call, call_diff, call_percent_change), (target_put, put_diff, put_percent_change) = targets
+                print(f"\t${args.premium} premium call strike target / change / % change : {format_colored_number(target_call.strikePrice, ocr.getMark())} / {format_colored_number(call_diff, 0)} / {format_colored_number(call_percent_change, 0)}")
+                print(f"\t${args.premium} premium put strike target / change / % change  : {format_colored_number(target_put.strikePrice, ocr.getMark())} / {format_colored_number(put_diff, 0)} / {format_colored_number(put_percent_change, 0)}")
+                print(f"\t${args.premium} premium call/put strike targets skew : {format_colored_number(call_diff + put_diff, 0)}")
+            else:
+                print("\tImpossible premium target")
         else:
-            print("Not found")
+            print("\tSymbol not found")
 
     except ValueError as e:
         print(f"Invalid parameter : {str(e)}")

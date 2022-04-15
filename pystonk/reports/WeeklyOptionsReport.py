@@ -5,7 +5,7 @@ from pystonk.utils import percent_diff
 from pystonk.utils.LoggerMixin import LoggerMixin
 
 from datetime import date
-from typing import Any, Dict, Generator, Tuple
+from typing import Any, Dict, Generator, Optional, Tuple
 
 
 class WeeklyOptionsReport(LoggerMixin):
@@ -40,7 +40,7 @@ class WeeklyOptionsReport(LoggerMixin):
     def getMark(self) -> float:
         return self._mark
 
-    def getStrikePricesForTargetPremium(self, premium: float, is_sell: bool = True) -> Tuple[Tuple[OptionContract, float, float], Tuple[OptionContract, float, float]]:
+    def getStrikePricesForTargetPremium(self, premium: float, is_sell: bool = True) -> Optional[Tuple[Tuple[OptionContract, float, float], Tuple[OptionContract, float, float]]]:
         premium = round(premium, 2)
         target_call = None
         target_put = None
@@ -53,4 +53,7 @@ class WeeklyOptionsReport(LoggerMixin):
             if put_price <= premium:
                 target_put = (put_option, round(float(strike_price) - self._mark, 2), percent_change)
 
-        return (target_call, target_put)
+        if target_call and target_put:
+            return (target_call, target_put)
+        else:
+            return None
