@@ -31,6 +31,7 @@ export PYSTONK_API_KEY={key from td ameritrade}
 Run project
 ```shell script
 pystonk_pcr {stock symbol} {percent threshold}
+pystonk_or {stock symbol} {target premium}
 ```
 
 ## TODO
