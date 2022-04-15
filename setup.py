@@ -22,7 +22,6 @@ setup(
     packages=find_packages(),
     package_data={'pyanoled': ['conf/*.conf']},
     install_requires=[
-        "argparse",
         "pyhocon",
         "requests",
         "termcolor",
@@ -34,8 +33,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'pystonk_pcr = pystonk.__main__:weekly_price_change_report',
-            'pystonk_or = pystonk.__main__:weekly_options_report',
+            'pystonk_terminal = pystonk.__main__:terminal',
         ]
     }
 )
