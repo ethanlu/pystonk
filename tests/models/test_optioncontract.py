@@ -47,3 +47,34 @@ class OptionContractTest(TestCase):
         self.assertFalse(o.isNonstandard, 'OptionContract did not normalize non-standard')
         self.assertEqual(o._expiration_datetime.timestamp(), 1641603600, 'OptionContract did not normalize expiration datetime')
         self.assertEqual(o._last_trading_datetime.timestamp(), 1641690000, 'OptionContract did not normalize last trading datetime')
+
+class OptionContractNaNTest(TestCase):
+    def testOptionContractInstantiation(self):
+        o = OptionContract(**{
+            "put_call": 'CALL',
+            "symbol": "test_010122C100",
+            "description": "TEST Jan 01 2022 100 Call",
+            "bid": 100.7,
+            "ask": 103.4,
+            "bid_ask_size": "3X4",
+            "volatility": "NaN",
+            "delta": "NaN",
+            "gamma": "NaN",
+            "theta": "NaN",
+            "vega": "NaN",
+            "rho": "NaN",
+            "open_interest": 5,
+            "strike_price": 100,
+            "expiration_datetime": 1641603600000,
+            "last_trading_datetime": 1641690000000,
+            "in_the_money": True,
+            "non_standard": False
+        })
+
+        self.assertIsInstance(o, OptionContract)
+        self.assertEqual(o.volatility, 0.00, 'OptionContract did not normalize NaN volatility')
+        self.assertEqual(o.delta, 0.00, 'OptionContract did not normalize NaN delta')
+        self.assertEqual(o.gamma, 0.00, 'OptionContract did not normalize NaN gamma')
+        self.assertEqual(o.theta, 0.00, 'OptionContract did not normalize NaN theta')
+        self.assertEqual(o.vega, 0.00, 'OptionContract did not normalize NaN vega')
+        self.assertEqual(o.rho, 0.00, 'OptionContract did not normalize NaN rho')

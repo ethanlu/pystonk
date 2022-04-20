@@ -1,6 +1,7 @@
 from pystonk.api.Types import ContractType
 
 from datetime import datetime
+from typing import Any
 
 
 class OptionContract(object):
@@ -24,6 +25,9 @@ class OptionContract(object):
                  expiration_datetime: int,
                  last_trading_datetime: int
     ):
+        def normalizeNaNFloat(input: Any) -> float:
+            return round(input, 2) if input != 'NaN' else 0.0
+
         self._contract_type = ContractType.CALL if put_call == ContractType.CALL.value else ContractType.PUT
         self._symbol = symbol.upper()
         self._description = description
@@ -31,12 +35,12 @@ class OptionContract(object):
         self._bid = round(bid, 2)
         self._ask = round(ask, 2)
         self._bid_ask_size = tuple(map(lambda x: int(x), bid_ask_size.split('X')))
-        self._volatility = round(volatility, 2)
-        self._delta = round(delta, 2)
-        self._gamma = round(gamma, 2)
-        self._theta = round(theta, 2)
-        self._vega = round(vega, 2)
-        self._rho = round(rho, 2)
+        self._volatility = normalizeNaNFloat(volatility)
+        self._delta = normalizeNaNFloat(delta)
+        self._gamma = normalizeNaNFloat(gamma)
+        self._theta = normalizeNaNFloat(theta)
+        self._vega = normalizeNaNFloat(vega)
+        self._rho = normalizeNaNFloat(rho)
         self._open_interest = open_interest
         self._in_the_money = in_the_money
         self._non_standard = non_standard

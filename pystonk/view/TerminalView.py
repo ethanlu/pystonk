@@ -57,6 +57,7 @@ class TerminalView(object):
             # show results on cli
             print(f"\tSymbol : {symbol}")
             print(f"\tTarget premium : {premium}")
+            print(f"\tMarket price : {report.getMark()}")
 
             targets = report.getStrikePricesForTargetPremium(premium)
             if targets:
