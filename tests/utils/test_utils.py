@@ -1,4 +1,4 @@
-from pystonk.utils import get_next_monday_friday, is_float, percent_diff
+from pystonk.utils import get_next_monday_friday, is_number, is_stock, percent_diff
 
 from datetime import date
 from unittest import TestCase
@@ -129,13 +129,25 @@ class UtilsTest(TestCase):
         self.assertEqual(f, date(2020, 3, 6))
 
     def testIsFloat(self):
-        self.assertTrue(is_float('1.0'))
-        self.assertTrue(is_float('0.1'))
-        self.assertTrue(is_float('.1'))
-        self.assertTrue(is_float('1.'))
+        self.assertTrue(is_number('1.0'))
+        self.assertTrue(is_number('0.1'))
+        self.assertTrue(is_number('.1'))
+        self.assertTrue(is_number('1.'))
 
     def testIsNotFloat(self):
-        self.assertFalse(is_float('d.1'))
-        self.assertFalse(is_float('1.d'))
-        self.assertFalse(is_float('d'))
-        self.assertFalse(is_float('!@'))
+        self.assertFalse(is_number('d.1'))
+        self.assertFalse(is_number('1.d'))
+        self.assertFalse(is_number('d'))
+        self.assertFalse(is_number('!@'))
+
+    def testIsStock(self):
+        self.assertTrue(is_stock('abcd'))
+        self.assertTrue(is_stock('abcd.s'))
+        self.assertTrue(is_stock('.abcd'))
+        self.assertTrue(is_stock('abcd.'))
+
+    def testIsNotStock(self):
+        self.assertFalse(is_stock('ab2'))
+        self.assertFalse(is_stock('abcd\s'))
+        self.assertFalse(is_stock('abcd-s'))
+        self.assertFalse(is_stock('abcd!s'))

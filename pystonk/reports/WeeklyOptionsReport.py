@@ -4,8 +4,9 @@ from pystonk.models.OptionContract import OptionContract
 from pystonk.utils import percent_diff
 from pystonk.utils.LoggerMixin import LoggerMixin
 
+from collections import namedtuple
 from datetime import date
-from typing import Any, Dict, Generator, Optional, Tuple
+from typing import Any, Dict, Generator, NamedTuple, Optional, Tuple
 
 
 class WeeklyOptionsReport(LoggerMixin):
@@ -40,20 +41,25 @@ class WeeklyOptionsReport(LoggerMixin):
     def getMark(self) -> float:
         return self._mark
 
-    def getStrikePricesForTargetPremium(self, premium: float, is_sell: bool = True) -> Optional[Tuple[Tuple[OptionContract, float, float], Tuple[OptionContract, float, float]]]:
+    def getStrikePricesForTargetPremium(self, premium: float, is_sell: bool = True) -> Optional[NamedTuple]:
         premium = round(premium, 2)
+
         target_call = None
-        target_put = None
         for strike_price, percent_change, call_option, put_option in self.generate():
             call_price = call_option.bid if is_sell else call_option.ask
-            put_price = put_option.bid if is_sell else put_option.ask
 
             if call_price >= premium:
                 target_call = (call_option, round(float(strike_price) - self._mark, 2), percent_change)
-            if put_price <= premium:
+
+        target_put = None
+        for strike_price, percent_change, call_option, put_option in reversed(list(self.generate())):
+            put_price = put_option.bid if is_sell else put_option.ask
+
+            if put_price >= premium:
                 target_put = (put_option, round(float(strike_price) - self._mark, 2), percent_change)
 
         if target_call and target_put:
-            return (target_call, target_put)
+            TargetOption = namedtuple('TargetOption', ('call', 'call_diff', 'call_diff_percent', 'put', 'put_diff', 'put_diff_percent'))
+            return TargetOption(*(target_call + target_put))
         else:
             return None

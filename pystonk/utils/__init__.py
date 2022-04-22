@@ -18,5 +18,9 @@ def get_next_monday_friday(d: date) -> Tuple[date, date]:
     return next_week + timedelta(days=-next_week.weekday()), next_week + timedelta(days=(4 - next_week.weekday()))
 
 
-def is_float(n: Any) -> bool:
-    return re.match('^\d*(\.\d*)?$', n) is not None
+def is_number(n: Any) -> bool:
+    return re.match(r"^\d*\.?\d*$", n) is not None
+
+
+def is_stock(n: Any) -> bool:
+    return re.match(r"^[a-zA-Z.]+$", n) is not None

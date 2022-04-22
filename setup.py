@@ -22,8 +22,11 @@ setup(
     packages=find_packages(),
     package_data={'pystonk': ['conf/*.conf']},
     install_requires=[
+        "boto3",
+        "prettytable",
         "pyhocon",
         "requests",
+        "slack_bolt",
         "termcolor",
         "wheel"
     ],
@@ -33,7 +36,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'pystonk_terminal = pystonk.__main__:terminal',
+            'pystonk_terminal = pystonk.terminal_app:terminal',
+            'pystonk_slack = pystonk.slack_app:start',
         ]
     }
 )
