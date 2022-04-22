@@ -1,4 +1,4 @@
-from pystonk.utils import get_next_monday_friday, percent_diff
+from pystonk.utils import get_next_monday_friday, is_float, percent_diff
 
 from datetime import date
 from unittest import TestCase
@@ -127,3 +127,15 @@ class UtilsTest(TestCase):
         m, f = get_next_monday_friday(date(2020, 2, 29))
         self.assertEqual(m, date(2020, 3, 2))
         self.assertEqual(f, date(2020, 3, 6))
+
+    def testIsFloat(self):
+        self.assertTrue(is_float('1.0'))
+        self.assertTrue(is_float('0.1'))
+        self.assertTrue(is_float('.1'))
+        self.assertTrue(is_float('1.'))
+
+    def testIsNotFloat(self):
+        self.assertFalse(is_float('d.1'))
+        self.assertFalse(is_float('1.d'))
+        self.assertFalse(is_float('d'))
+        self.assertFalse(is_float('!@'))

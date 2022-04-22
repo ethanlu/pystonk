@@ -5,6 +5,7 @@ from pystonk.api.QuoteApi import QuoteApi
 from pystonk.reports.WeeklyPriceChangeReport import WeeklyPriceChangeReport
 from pystonk.reports.WeeklyOptionsReport import WeeklyOptionsReport
 from pystonk.view.TerminalView import TerminalView
+from pystonk.utils import is_float
 
 from pyhocon import ConfigFactory
 
@@ -19,26 +20,30 @@ def terminal():
 
         if report == 1:
             print("Enter stock symbol : ", end='')
-            symbol = str(input())
+            symbol = str(input()).upper()
             if not symbol:
-                raise ValueError("Invalid stock symbol : {args.symbol}")
+                raise ValueError(f"Invalid stock symbol : {symbol}")
 
             print("Enter percent change threshold : ", end='')
-            percent = abs(round(float(input()), 2))
-            if not percent:
-                raise ValueError("Invalid percent change threshold : {args.percent}")
+            percent = input()
+            if not percent or not is_float(percent):
+                raise ValueError(f"Invalid percent change threshold : {percent}")
+            percent = abs(round(float(percent), 2))
 
             view = TerminalView()
             view.showPriceHistory(WeeklyPriceChangeReport(PriceHistoryApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key'])), symbol, percent)
 
         elif report == 2:
             print("Enter stock symbol : ", end='')
-            symbol = str(input())
+            symbol = str(input()).upper()
             if not symbol:
-                raise ValueError("Invalid stock symbol : {args.symbol}")
+                raise ValueError(f"Invalid stock symbol : {symbol}")
 
             print("Enter target premium : ", end='')
-            premium = abs(round(float(input()), 2))
+            premium = input()
+            if not premium or not is_float(premium):
+                raise ValueError(f"Invalid target premium : {premium}")
+            premium = abs(round(float(premium), 2))
 
             view = TerminalView()
             view.showOptionsChain(
