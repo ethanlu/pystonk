@@ -5,6 +5,7 @@ from pystonk.api.QuoteApi import QuoteApi
 from pystonk.reports.WeeklyPriceChangeReport import WeeklyPriceChangeReport
 from pystonk.reports.WeeklyOptionsReport import WeeklyOptionsReport
 from pystonk.view.SlackView import SlackView
+from pystonk.utils.LoggerMixin import getLogger
 
 from pyhocon import ConfigFactory
 from slack_bolt import App
@@ -17,7 +18,8 @@ import re
 config = ConfigFactory.parse_file(get_conf_path('app.conf'))
 app = App(
     token=config['slack']['token'],
-    signing_secret=config['slack']['secret']
+    signing_secret=config['slack']['secret'],
+    logger=getLogger('pystonk')
 )
 
 
@@ -29,13 +31,18 @@ def ph_handler(*args) -> Tuple:
             PriceHistoryApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key'])
         )
         r.retrieveData(symbol)
-        data = r.generate(percent)
-        total_weeks = r.totalWeeks()
-        total_exceeded_weeks = r.thresholdExceededWeeksTotal(percent)
-        longest_exceeded_week = r.longestThresholdExceededWeeks(percent)
 
+        view = SlackView()
+        response = view.showPriceHistory(
+            symbol=symbol,
+            percent=percent,
+            data=r.generate(percent),
+            total_weeks=r.totalWeeks(),
+            exceeded_weeks=r.thresholdExceededWeeksTotal(percent),
+            longest_weeks=r.longestThresholdExceededWeeks(percent)
+        )
 
-        return f"price history for {symbol} with {percent} threshold", []
+        return f"price history for {symbol} with {percent} threshold", response
     except Exception as e:
         return f"Unexpected error: {e}", []
 
@@ -48,7 +55,19 @@ def oc_handler(*args) -> Tuple:
             QuoteApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key']),
             OptionsChainApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key'])
         )
-        return f"option chain for {symbol} with {premium} premium", []
+        r.retrieveData(symbol)
+
+        view = SlackView()
+        response = view.showOptionsChain(
+            symbol=symbol,
+            premium=premium,
+            current_price=r.getMark(),
+            data=r.generate(),
+            sell_options=r.getStrikePricesForTargetPremium(premium),
+            buy_options=r.getStrikePricesForTargetPremium(premium, is_sell=False)
+        )
+
+        return f"option chain for {symbol} with {premium} premium", response
     except Exception as e:
         return f"Unexpected error: {e}", []
 
@@ -65,6 +84,7 @@ def parse_command(text: str) -> Tuple:
 @app.event("app_mention")
 def mention(client, event, logger):
     try:
+        logger.debug(event)
         view = SlackView()
         handler, args = parse_command(event['text'])
         if not handler:
@@ -75,6 +95,10 @@ def mention(client, event, logger):
             text_response = response[0]
             block_response = response[1]
 
+        logger.debug(f"channel : {event['channel']}")
+        logger.debug(f"block : {block_response}")
+        logger.debug(f"block length : {len(str(block_response))}")
+        logger.debug(f"text : {len(text_response)}")
         client.chat_postMessage(
             channel=event['channel'],
             blocks=block_response,

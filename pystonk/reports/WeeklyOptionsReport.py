@@ -16,7 +16,7 @@ class WeeklyOptionsReport(LoggerMixin):
         self._mark = None
         self._options_chain: Dict[str, Tuple[OptionContract, OptionContract]] = {}
 
-    def retrieveData(self, symbol: str) -> bool:
+    def retrieveData(self, symbol: str, strike_count=200) -> bool:
         symbol = symbol.upper()
 
         # get last known price
@@ -26,7 +26,7 @@ class WeeklyOptionsReport(LoggerMixin):
         self._options_chain = self._options_chain_api.getWeeklySingleOptionChain(
             symbol=symbol,
             week_date=date.today(),
-            strike_count=200
+            strike_count=strike_count
         )
 
         return len(self._options_chain) > 0
