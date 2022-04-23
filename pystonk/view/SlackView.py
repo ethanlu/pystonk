@@ -1,45 +1,91 @@
+import random
+
 from prettytable import PrettyTable
 from typing import Dict, Iterable, List, NamedTuple, Optional
 
 class SlackView(object):
     SLACK_BLOCK_LIMIT = 35
+    SLACK_OK_EMOJI = (':ro-yup:', ':ro-thumbsup:', ':perfect:', ':meme-yiss:')
+    SLACK_FAIL_EMOJI = (':ro-hmm:', ':ro-sob:', ':ro-omg:', ':ro-oops:', ':ro-pff:', ':ro-sorry:', ':ro-sweat:', ':ro-question:', ':ro-exclamation:', ':think-3d:', ':where:', ':poop-animated:', ':blob_think:')
 
-    def showAvailableCommands(self) -> Dict:
-        return {
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*I didn't understand your command* :ro-hmm:"
-                    }
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "Here are the available commands:"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "`ph {stock symbol} {percent change threshold (decimal)}` \n\n This command will show the weekly price changes for the stock in the past year. The second parameter will mark any week where the price change exceeded the threshold"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "`oc {stock symbol} {target premium price (decimal)}` \n\n This command shows next week's options chain for the stock and the strike prices for calls and puts that is closest to the given target premium price"
-                    }
+
+    def showUnexpectedError(self, e: str):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"{random.choice(self.SLACK_FAIL_EMOJI)} \n Unexpected error : {e}"
                 }
-            ]
-        }
+            }
+        ]
+
+    def showAvailableCommands(self) -> List:
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"{random.choice(self.SLACK_FAIL_EMOJI)} \n I didn't understand your command"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Here are the available commands:"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "`pc {stock symbol}` \n\n This command will show the current market price the stock"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "`ph {stock symbol} {percent change threshold (decimal)}` \n\n This command will show the weekly price changes for the stock in the past year. The second parameter will mark any week where the price change exceeded the threshold"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "`oc {stock symbol} {target premium price (decimal)}` \n\n This command shows next week's options chain for the stock and the strike prices for calls and puts that is closest to the given target premium price"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "If you want to be discrete, the above commands are also available with the `/pystonk` command, but the results will only be visible to you."
+                }
+            }
+        ]
+
+    def showPriceCheck(self, symbol: str, price: Optional[float]) -> List:
+        if price:
+            msg = f"{random.choice(self.SLACK_OK_EMOJI)} \n `{symbol}` is currently `{round(price, 2)}`"
+        else:
+            msg = f"{random.choice(self.SLACK_FAIL_EMOJI)} \n `{symbol}` is not found..."
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": msg
+                }
+            }
+        ]
 
     def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List]) -> List:
         t = PrettyTable()
@@ -64,7 +110,7 @@ class SlackView(object):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Here is the price history details for `{symbol}` with intervals where the price change exceeded `{percent}%` marked with `*`"
+                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is the price history details for `{symbol}` with intervals where the price change exceeded `{percent}%` marked with `*`"
                 },
             },
             {
@@ -109,7 +155,7 @@ class SlackView(object):
 
     def showOptionsChain(self, symbol: str, premium: float, current_price: float, data: Iterable, sell_options: Optional[NamedTuple], buy_options: Optional[NamedTuple]) -> List:
         t = PrettyTable()
-        t.field_names = (' ', 'Call Bid', 'Call Ask', 'Put Bid', 'Put Ask', 'Strike', '% Change')
+        t.field_names = ('  ', 'Call Bid', 'Call Ask', 'Put Bid', 'Put Ask', 'Strike', '% Change')
 
         sell_call = sell_put = buy_call = buy_put = None
         if sell_options:
@@ -146,7 +192,7 @@ class SlackView(object):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Here is next week's option chain for `{symbol}` with target premium price `{premium}` for buy-call, buy-put, sell-call, and sell-put marked as `C`, `P`, `c`, and `p` respectively:"
+                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is next week's option chain for `{symbol}` with target premium price `{premium}` for buy-call, buy-put, sell-call, and sell-put marked as `C`, `P`, `c`, and `p` respectively:"
                 }
             },
             {
@@ -161,7 +207,7 @@ class SlackView(object):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"```{t.get_string(start=i, end=i + self.SLACK_BLOCK_LIMIT, header=(i == 0))}```"
+                        "text": f"```{t.get_string(start=i, end=i + self.SLACK_BLOCK_LIMIT)}```"
                     }
                 }
             )

@@ -54,7 +54,10 @@ def terminal():
                 raise ValueError(f"Invalid target premium : {premium}")
             premium = abs(round(float(premium), 2))
 
-            r = WeeklyOptionsReport(QuoteApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key']), OptionsChainApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key']))
+            r = WeeklyOptionsReport(
+                QuoteApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key']),
+                OptionsChainApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key'])
+            )
             r.retrieveData(symbol)
 
             view = TerminalView()

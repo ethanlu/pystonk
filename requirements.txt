@@ -1,0 +1,7 @@
+boto3
+prettytable
+pyhocon
+requests
+slack_bolt
+termcolor
+wheel

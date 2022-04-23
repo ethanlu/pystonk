@@ -4,7 +4,7 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setup(
-    name="pytstonk",
+    name="pystonk",
     version="1.0.0",
     author="Ethan Lu",
     author_email="fang.lu@gmail.com",
