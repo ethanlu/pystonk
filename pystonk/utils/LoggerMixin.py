@@ -3,7 +3,7 @@ from pystonk import get_conf_path
 from logging import config, getLogger, Logger
 from pyhocon import ConfigFactory
 
-config.dictConfig(ConfigFactory.parse_file(get_conf_path('app.conf'))['log'])
+config.dictConfig(ConfigFactory.parse_file(get_conf_path())['log'])
 
 class LoggerMixin(object):
     @property

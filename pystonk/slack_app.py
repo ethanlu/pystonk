@@ -15,7 +15,7 @@ from typing import Tuple
 import re
 
 
-config = ConfigFactory.parse_file(get_conf_path('app.conf'))
+config = ConfigFactory.parse_file(get_conf_path())
 app = App(
     token=config['slack']['token'],
     signing_secret=config['slack']['secret'],
@@ -150,7 +150,7 @@ def slash_command(respond, body):
         logger.error(f"Error publishing mention: {e}")
 
 
-app.command("/pystonk")(
+app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))(
     ack=send_ack,
     lazy=[slash_command]
 )

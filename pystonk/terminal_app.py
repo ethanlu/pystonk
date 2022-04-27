@@ -30,7 +30,7 @@ def terminal():
                 raise ValueError(f"Invalid percent change threshold : {percent}")
             percent = abs(round(float(percent), 2))
 
-            r = WeeklyPriceChangeReport(PriceHistoryApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key']))
+            r = WeeklyPriceChangeReport(PriceHistoryApi(ConfigFactory.parse_file(get_conf_path())['api_key']))
             r.retrieveData(symbol)
 
             view = TerminalView()
@@ -55,8 +55,8 @@ def terminal():
             premium = abs(round(float(premium), 2))
 
             r = WeeklyOptionsReport(
-                QuoteApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key']),
-                OptionsChainApi(ConfigFactory.parse_file(get_conf_path('app.conf'))['api_key'])
+                QuoteApi(ConfigFactory.parse_file(get_conf_path())['api_key']),
+                OptionsChainApi(ConfigFactory.parse_file(get_conf_path())['api_key'])
             )
             r.retrieveData(symbol)
 
@@ -73,3 +73,7 @@ def terminal():
             raise ValueError('Invalid report number')
     except ValueError as e:
         print(str(e))
+
+
+if __name__ == '__main__':
+    terminal()
