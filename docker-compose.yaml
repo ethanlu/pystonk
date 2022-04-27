@@ -14,5 +14,14 @@ services:
     entrypoint:
       - /bin/bash
       - docker/entrypoint.sh
+    ports:
+      - "3000:3000"
     volumes:
-      - ".:/opt/app"
+      - "./pystonk:/opt/app/pystonk"
+      - "./tests:/opt/app/tests"
+  ngrok:
+    image: ngrok/ngrok:alpine
+    container_name: ngrok
+    env_file:
+      - .env
+    command: [ "http", "host.docker.internal:3000" ]
