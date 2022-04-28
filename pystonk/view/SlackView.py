@@ -67,7 +67,7 @@ class SlackView(object):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "If you want to be discrete, the above commands are also available with the `/pystonk` command, but the results will only be visible to you."
+                    "text": "The above commands are also available with the `/pystonk` command, but the results will only be visible to you"
                 }
             }
         ]

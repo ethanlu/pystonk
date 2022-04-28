@@ -63,12 +63,6 @@ docker-compose build
 docker-compose run pystonk
 ```
 
-### Deploy
-```shell script
-pip install python-lambda
-lambda deploy --config-file=aws_lambda.yaml --requirements=requirements.txt
-```
-
 ## TODO
 - More reports & slack commands
 - Kivy desktop app
