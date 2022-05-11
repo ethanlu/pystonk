@@ -225,7 +225,7 @@ class SlackView(object):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"`c` : Closest strike price for sell-call is `{sell_options.call.strikePrice}`\nWhich is `{sell_options.call_diff}` from current price of `{current_price}` (`{sell_options.call_diff_percent}%`)"
+                        "text": f"`c` : Closest `{sell_options.call.expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-call is `{sell_options.call.strikePrice}`\nWhich is `{sell_options.call_diff}` from current price of `{current_price}` (`{sell_options.call_diff_percent}%`)"
                     }
                 }
             )
@@ -234,7 +234,7 @@ class SlackView(object):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"`p` : Closest strike price for sell-put is `{sell_options.put.strikePrice}`\nWhich is `{sell_options.put_diff}` from current price of `{current_price}` (`{sell_options.put_diff_percent}%`)"
+                        "text": f"`p` : Closest `{sell_options.put.expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-put is `{sell_options.put.strikePrice}`\nWhich is `{sell_options.put_diff}` from current price of `{current_price}` (`{sell_options.put_diff_percent}%`)"
                     }
                 }
             )
@@ -259,7 +259,7 @@ class SlackView(object):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"`C` : Closest strike price for buy-call is `{buy_options.call.strikePrice}`\nWhich is `{buy_options.call_diff}` from current price of `{current_price}` (`{buy_options.call_diff_percent}%`)"
+                        "text": f"`C` : Closest `{buy_options.call.expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-call is `{buy_options.call.strikePrice}`\nWhich is `{buy_options.call_diff}` from current price of `{current_price}` (`{buy_options.call_diff_percent}%`)"
                     }
                 }
             )
@@ -268,7 +268,7 @@ class SlackView(object):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"`P` : Closest strike price for buy-put is `{buy_options.put.strikePrice}`\nWhich is `{buy_options.put_diff}` from current price of `{current_price}` (`{buy_options.put_diff_percent}%`)"
+                        "text": f"`P` : Closest `{buy_options.put.expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-put is `{buy_options.put.strikePrice}`\nWhich is `{buy_options.put_diff}` from current price of `{current_price}` (`{buy_options.put_diff_percent}%`)"
                     }
                 }
             )

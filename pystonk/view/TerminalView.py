@@ -88,12 +88,12 @@ class TerminalView(object):
         if sell_options:
             print()
             print(
-                f"Closest Sell Call Strike Price / Change / % Change : {self.format_colored_number(sell_options.call.strikePrice, current_price)} / "
+                f"Closest {sell_options.call.expirationDateTime.strftime('%Y-%m-%d')} Sell Call Strike Price / Change / % Change : {self.format_colored_number(sell_options.call.strikePrice, current_price)} / "
                 f"{self.format_colored_number(sell_options.call_diff, 0)} / "
                 f"{self.format_colored_number(sell_options.call_diff_percent, 0)}"
             )
             print(
-                f"Closest Sell Put Strike Price / Change / % Change : {self.format_colored_number(sell_options.put.strikePrice, current_price)} / "
+                f"Closest {sell_options.put.expirationDateTime.strftime('%Y-%m-%d')} Sell Put Strike Price / Change / % Change : {self.format_colored_number(sell_options.put.strikePrice, current_price)} / "
                 f"{self.format_colored_number(sell_options.put_diff, 0)} / "
                 f"{self.format_colored_number(sell_options.put_diff_percent, 0)}"
             )
@@ -102,12 +102,12 @@ class TerminalView(object):
         if buy_options:
             print()
             print(
-                f"Closest Buy Call Strike Price / Change / % Change : {self.format_colored_number(buy_options.call.strikePrice, current_price)} / "
+                f"Closest {buy_options.call.expirationDateTime.strftime('%Y-%m-%d')} Buy Call Strike Price / Change / % Change : {self.format_colored_number(buy_options.call.strikePrice, current_price)} / "
                 f"{self.format_colored_number(buy_options.call_diff, 0)} / "
                 f"{self.format_colored_number(buy_options.call_diff_percent, 0)}"
             )
             print(
-                f"Closest Buy Put Strike Price / Change / % Change : {self.format_colored_number(buy_options.put.strikePrice, current_price)} / "
+                f"Closest {buy_options.put.expirationDateTime.strftime('%Y-%m-%d')} Buy Put Strike Price / Change / % Change : {self.format_colored_number(buy_options.put.strikePrice, current_price)} / "
                 f"{self.format_colored_number(buy_options.put_diff, 0)} / "
                 f"{self.format_colored_number(buy_options.put_diff_percent, 0)}"
             )
