@@ -23,9 +23,12 @@ setup(
     package_data={'pystonk': ['conf/*.conf']},
     install_requires=[
         "boto3",
+        "numpy",
         "prettytable",
         "pyhocon",
+        "quickchart.io",
         "requests",
+        "scipy",
         "slack_bolt",
         "termcolor",
         "wheel"

@@ -9,7 +9,7 @@ class TerminalView(object):
         threshold = float(threshold)
         return colored("{:8.2f}".format(input), 'green' if input > threshold else 'red' if input < threshold else 'white')
 
-    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List]):
+    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List], normal_distribution:NamedTuple):
         t = PrettyTable()
         t.field_names = (' ', 'Week', 'Open', 'Close', '% Change')
 
@@ -43,6 +43,9 @@ class TerminalView(object):
             print(
                 f"Longest Consecutive Threshold Exceeded Weeks: {longest_weeks[0][1].startDateTime.strftime('%Y-%m-%d')} to {longest_weeks[-1][1].startDateTime.strftime('%Y-%m-%d')} ({len(longest_weeks)} weeks)"
             )
+        print(f"Percent Change Mean: {normal_distribution.mean, 2}")
+        print(f"Percent Change STD: {normal_distribution.std}")
+        print(f"Percent Threshold Exceed Probability: {normal_distribution.pp}")
         print()
 
     def showOptionsChain(self, symbol: str, premium: float, current_price: float, data: Iterable, sell_options: Optional[NamedTuple], buy_options: Optional[NamedTuple]):

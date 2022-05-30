@@ -2,7 +2,7 @@
 
 if [ "$PYSTONK_MODE" == "slack" ]
 then
-  python slack_app.py
+  python pystonk/slack_app.py
 else
-  python terminal_app.py
+  python pystonk/terminal_app.py
 fi

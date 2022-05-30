@@ -51,7 +51,8 @@ def ph_handler(*args) -> Tuple:
             data=r.generate(percent),
             total_weeks=r.totalWeeks(),
             exceeded_weeks=r.thresholdExceededWeeksTotal(percent),
-            longest_weeks=r.longestThresholdExceededWeeks(percent)
+            longest_weeks=r.longestThresholdExceededWeeks(percent),
+            normal_distribution=r.normalDistribution(percent)
         )
 
         return f"price history for {symbol} with {percent} threshold", response

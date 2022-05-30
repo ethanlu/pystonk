@@ -40,7 +40,8 @@ def terminal():
                 data=r.generate(percent),
                 total_weeks=r.totalWeeks(),
                 exceeded_weeks=r.thresholdExceededWeeksTotal(percent),
-                longest_weeks=r.longestThresholdExceededWeeks(percent)
+                longest_weeks=r.longestThresholdExceededWeeks(percent),
+                normal_distribution=r.normalDistribution(percent)
             )
         elif report == 2:
             print("Enter stock symbol : ", end='')

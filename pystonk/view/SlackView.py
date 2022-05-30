@@ -1,5 +1,6 @@
 import random
 
+from quickchart import QuickChart
 from prettytable import PrettyTable
 from typing import Dict, Iterable, List, NamedTuple, Optional
 
@@ -87,7 +88,7 @@ class SlackView(object):
             }
         ]
 
-    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List]) -> List:
+    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List], normal_distribution: NamedTuple) -> List:
         t = PrettyTable()
         t.field_names = (' ', 'Week', 'Open', 'Close', '% Change')
 
@@ -149,6 +150,69 @@ class SlackView(object):
                     }
                 }
             )
+
+        qc = QuickChart()
+        qc.width = 800
+        qc.width = 400
+        qc.device_pixel_ratio = 2.0
+        qc.config = {
+            "type": "scatter",
+            "data": {
+                "datasets": [{
+                    "label": "Weekly Price Change",
+                    "data": normal_distribution.data
+                }]
+            },
+            "options": {
+                "scales": {
+                    "xAxes": [{
+                        "scaleLabel": {
+                            "display": True,
+                            "labelString": "Percent Change"
+                        }
+                    }],
+                    "yAxes": [{
+                        "scaleLabel": {
+                            "display": True,
+                            "labelString": "Probability"
+                        }
+                    }]
+                }
+            }
+        }
+
+        response += [
+            {
+                "type": "image",
+                "title": {
+                    "type": "plain_text",
+                    "text": "Weekly Price Change Distribution"
+                },
+                "image_url": qc.get_url(),
+                "alt_text": "Weekly Price Change Distribution"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Percent Change Mean : `{normal_distribution.mean}`"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Percent Change STD : `{normal_distribution.std}`"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Percent Threshold Exceed Probability : `{normal_distribution.pp}`"
+                }
+            }
+        ]
 
         return response
 
