@@ -1,14 +1,11 @@
 from pystonk.api.PriceHistoryApi import PriceHistoryApi
 from pystonk.api.Types import FrequencyType, PeriodType
 from pystonk.models.CandleStick import CandleStick
+from pystonk.models.PriceChangeEstimate import PriceChangeEstimate
 from pystonk.utils.LoggerMixin import LoggerMixin
 
-from collections import namedtuple
 from itertools import groupby
-from scipy.stats import norm
-from typing import Any, Generator, List, Optional, NamedTuple, Tuple
-
-import numpy as np
+from typing import Any, Generator, List, Optional, Tuple
 
 
 class WeeklyPriceChangeReport(LoggerMixin):
@@ -27,6 +24,8 @@ class WeeklyPriceChangeReport(LoggerMixin):
             frequency_type=FrequencyType.WEEKLY,
             frequency=1
         )
+
+        self._price_change_estimate = PriceChangeEstimate(self._candlesticks)
 
     def generate(self, percent_threshold: float) -> Generator[Tuple[int, CandleStick], Any, None]:
         '''
@@ -70,17 +69,5 @@ class WeeklyPriceChangeReport(LoggerMixin):
         else:
             return None
 
-    def normalDistribution(self, percent_threshold: float) -> NamedTuple:
-        d = np.array([week.percentChange for (group, week) in self.generate(percent_threshold)])
-        mean = np.mean(d)
-        std = np.std(d)
-        pdf = norm.pdf(d, loc=mean, scale=std)
-        pp = 1 - norm(loc=mean, scale=std).cdf(percent_threshold)
-
-        NormalDistributionData = namedtuple('NormalDistributionData', ('data', 'mean', 'std', 'pp'))
-        return NormalDistributionData(*(
-            [{'x': round(x, 2), 'y': round(y, 4)} for (x, y) in zip(d, pdf)],
-            round(mean, 2),
-            round(std, 2),
-            round(pp * 100, 2)
-        ))
+    def priceChangeEstimate(self):
+        return self._price_change_estimate

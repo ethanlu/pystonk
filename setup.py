@@ -28,7 +28,7 @@ setup(
         "pyhocon",
         "quickchart.io",
         "requests",
-        "scipy",
+        "statsmodels",
         "slack_bolt",
         "termcolor",
         "wheel"

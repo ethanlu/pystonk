@@ -1,3 +1,5 @@
+from pystonk.models.PriceChangeEstimate import PriceChangeEstimate
+
 from prettytable import PrettyTable
 from termcolor import colored
 from typing import Any, Iterable, List, NamedTuple, Optional
@@ -9,7 +11,7 @@ class TerminalView(object):
         threshold = float(threshold)
         return colored("{:8.2f}".format(input), 'green' if input > threshold else 'red' if input < threshold else 'white')
 
-    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List], normal_distribution:NamedTuple):
+    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List], price_change_estimate:PriceChangeEstimate):
         t = PrettyTable()
         t.field_names = (' ', 'Week', 'Open', 'Close', '% Change')
 
@@ -43,9 +45,10 @@ class TerminalView(object):
             print(
                 f"Longest Consecutive Threshold Exceeded Weeks: {longest_weeks[0][1].startDateTime.strftime('%Y-%m-%d')} to {longest_weeks[-1][1].startDateTime.strftime('%Y-%m-%d')} ({len(longest_weeks)} weeks)"
             )
-        print(f"Percent Change Mean: {normal_distribution.mean, 2}")
-        print(f"Percent Change STD: {normal_distribution.std}")
-        print(f"Percent Threshold Exceed Probability: {normal_distribution.pp}")
+        print(f"Percent Change Mean: {price_change_estimate.mean()}")
+        print(f"Percent Change STD: {price_change_estimate.std()}")
+        print(f"Percent Threshold Exceed Probability (Unweighted): {price_change_estimate.percentProbability(percent, weighted=False)}")
+        print(f"Percent Threshold Exceed Probability (Weighted)  : {price_change_estimate.percentProbability(percent)}")
         print()
 
     def showOptionsChain(self, symbol: str, premium: float, current_price: float, data: Iterable, sell_options: Optional[NamedTuple], buy_options: Optional[NamedTuple]):

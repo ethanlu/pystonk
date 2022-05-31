@@ -45,11 +45,6 @@ class WeeklyPriceChangeReportTest(TestCase):
         self.assertEqual(o.thresholdExceededWeeksTotal(percent), 10, "WeeklyPriceChangeReport did not return expected number of weeks that exceeded threshold")
         self.assertEqual(len(o.longestThresholdExceededWeeks(percent)), 4, "WeeklyPriceChangeReport did not return expected number for longest consecutive weeks that exceeded threshold")
 
-        nd = o.normalDistribution(percent)
-        self.assertEqual(-1, nd.mean, "WeeklyPriceChangeReport did not return expected normal distribution mean")
-        self.assertEqual(5.55, round(nd.std, 2), "WeeklyPriceChangeReport did not return expected normal distribution std")
-        self.assertEqual(.18, round(nd.pp, 2), "WeeklyPriceChangeReport did not return expected normal distribution percent probability")
-
     def testEmptyReport(self):
         percent = 11.0
         o = WeeklyPriceChangeReport(self._mock_api)

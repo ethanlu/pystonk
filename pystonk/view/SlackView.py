@@ -1,14 +1,18 @@
-import random
+from pystonk.models.PriceChangeEstimate import PriceChangeEstimate
 
 from quickchart import QuickChart
 from prettytable import PrettyTable
 from typing import Dict, Iterable, List, NamedTuple, Optional
 
+import random
+
 class SlackView(object):
     SLACK_BLOCK_LIMIT = 35
     SLACK_OK_EMOJI = (':ro-yup:', ':ro-thumbsup:', ':perfect:', ':meme-yiss:')
     SLACK_FAIL_EMOJI = (':ro-hmm:', ':ro-sob:', ':ro-omg:', ':ro-oops:', ':ro-pff:', ':ro-sorry:', ':ro-sweat:', ':ro-question:', ':ro-exclamation:', ':think-3d:', ':where:', ':poop-animated:', ':blob_think:')
-
+    CHART_WIDTH = 600
+    CHART_HEIGHT = 400
+    CHAR_PIXEL_RATIO = 2
 
     def showUnexpectedError(self, e: str):
         return [
@@ -88,7 +92,7 @@ class SlackView(object):
             }
         ]
 
-    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List], normal_distribution: NamedTuple) -> List:
+    def showPriceHistory(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List], price_change_estimate: PriceChangeEstimate) -> List:
         t = PrettyTable()
         t.field_names = (' ', 'Week', 'Open', 'Close', '% Change')
 
@@ -151,30 +155,74 @@ class SlackView(object):
                 }
             )
 
-        qc = QuickChart()
-        qc.width = 800
-        qc.width = 400
-        qc.device_pixel_ratio = 2.0
-        qc.config = {
+        pdc = QuickChart()
+        pdc.width = self.CHART_WIDTH
+        pdc.height = self.CHART_HEIGHT
+        pdc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
+        pdc.config = {
             "type": "scatter",
             "data": {
-                "datasets": [{
-                    "label": "Weekly Price Change",
-                    "data": normal_distribution.data
-                }]
+                "datasets": [
+                    {
+                        #"type": "scatter",
+                        "label": "Weighted Density",
+                        "data": [{"x": x, "y": y} for (x, y) in zip(*price_change_estimate.pdf())]
+                    },
+                    {
+                        #"type": "scatter",
+                        "label": "Unweighted Density",
+                        "data": [{"x": x, "y": y} for (x, y) in zip(*price_change_estimate.pdf(weighted=False))]
+                    },
+                ]
             },
             "options": {
                 "scales": {
                     "xAxes": [{
                         "scaleLabel": {
                             "display": True,
-                            "labelString": "Percent Change"
+                            "labelString": "Price Change Percent"
                         }
                     }],
                     "yAxes": [{
                         "scaleLabel": {
                             "display": True,
                             "labelString": "Probability"
+                        }
+                    }]
+                }
+            }
+        }
+
+        hc = QuickChart()
+        hc.width = self.CHART_WIDTH
+        hc.height = self.CHART_HEIGHT
+        hc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
+        hc.config = {
+            "type": "bar",
+            "data": {
+                "labels": price_change_estimate.histogramBins(),
+                "datasets": [
+                    {
+                        "label": "Price Change",
+                        "data": price_change_estimate.histogram()
+                    }
+                ]
+            },
+            "options": {
+                "scales": {
+                    "y": {
+                        "beginAtZero": True
+                    },
+                    "xAxes": [{
+                        "scaleLabel": {
+                            "display": True,
+                            "labelString": "Price Change Percent"
+                        }
+                    }],
+                    "yAxes": [{
+                        "scaleLabel": {
+                            "display": True,
+                            "labelString": "Count"
                         }
                     }]
                 }
@@ -188,28 +236,44 @@ class SlackView(object):
                     "type": "plain_text",
                     "text": "Weekly Price Change Distribution"
                 },
-                "image_url": qc.get_url(),
+                "image_url": pdc.get_short_url(),
                 "alt_text": "Weekly Price Change Distribution"
             },
             {
+                "type": "image",
+                "title": {
+                    "type": "plain_text",
+                    "text": "Weekly Price Change Histogram"
+                },
+                "image_url": hc.get_short_url(),
+                "alt_text": "Weekly Price Change Histogram"
+            },
+            {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Percent Change Mean : `{normal_distribution.mean}`"
+                    "text": f"Percent Change Mean : `{price_change_estimate.mean()}`"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Percent Change STD : `{normal_distribution.std}`"
+                    "text": f"Percent Change STD : `{price_change_estimate.std()}`"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Percent Threshold Exceed Probability : `{normal_distribution.pp}`"
+                    "text": f"Percent Threshold Exceed Probability (Unweighted) : `{price_change_estimate.percentProbability(percent, weighted=False)}`"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Percent Threshold Exceed Probability (Weighted) : `{price_change_estimate.percentProbability(percent)}`"
                 }
             }
         ]
