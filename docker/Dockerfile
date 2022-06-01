@@ -8,4 +8,4 @@ RUN apt-get update
 RUN pip install --no-cache-dir --upgrade pip \
     && python setup.py develop
 
-CMD ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["bin/bash", "docker/entrypoint.sh"]
