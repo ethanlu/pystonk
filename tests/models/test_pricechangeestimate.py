@@ -32,14 +32,13 @@ class PriceChangeEstimateTest(TestCase):
         self.assertEqual(o.std(), 6.42, "PricechangeEstimate did not calculate expected STD")
 
         bins = o.histogramBins()
-        self.assertEqual(len(bins), len(PriceChangeEstimate.BINS) - 1, "PriceChangeEstimate did not calculate expected number of histogram bins")
         self.assertTrue(bins[0] < 0, "PriceChangeEstimate did not start histogram bins at negative value")
         self.assertTrue(bins[-1] > 0, "PriceChangeEstimate did not end histogram bins at positive value")
 
         h = o.histogram()
-        self.assertEqual(len(h), len(PriceChangeEstimate.BINS) - 1, "PriceChangeEstimate did not calculate expected number of histogram data")
+        self.assertEqual(len(h), len(bins), "PriceChangeEstimate did not calculate expected number of histogram data")
 
-        nh = o.histogram(normalize=True)
-        self.assertEqual(len([v for v in nh if v <= 1.0]), len(PriceChangeEstimate.BINS) - 1,  "PriceChangeEstimate did not calculate expected number of normalized histogram data")
+        self.assertEqual(o.percentProbability(15), .69, "PriceChangeEstimate did not calculate percent probability correctly for weighted and unweighted")
 
-        self.assertNotEqual(o.percentProbability(15), o.percentProbability(15, weighted=False), "PriceChangeEstimate did not calculate percent propbability correctly for weighted and unweighted")
+        x, y = o.pdf()
+        self.assertEqual(len(x), len(y), "PriceChangeEstimate did not calculate pdf with expected values")

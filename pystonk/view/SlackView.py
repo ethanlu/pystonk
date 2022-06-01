@@ -164,15 +164,9 @@ class SlackView(object):
             "data": {
                 "datasets": [
                     {
-                        #"type": "scatter",
-                        "label": "Weighted Density",
+                        "label": "Probability Density",
                         "data": [{"x": x, "y": y} for (x, y) in zip(*price_change_estimate.pdf())]
-                    },
-                    {
-                        #"type": "scatter",
-                        "label": "Unweighted Density",
-                        "data": [{"x": x, "y": y} for (x, y) in zip(*price_change_estimate.pdf(weighted=False))]
-                    },
+                    }
                 ]
             },
             "options": {
@@ -234,15 +228,6 @@ class SlackView(object):
                 "type": "image",
                 "title": {
                     "type": "plain_text",
-                    "text": "Weekly Price Change Distribution"
-                },
-                "image_url": pdc.get_short_url(),
-                "alt_text": "Weekly Price Change Distribution"
-            },
-            {
-                "type": "image",
-                "title": {
-                    "type": "plain_text",
                     "text": "Weekly Price Change Histogram"
                 },
                 "image_url": hc.get_short_url(),
@@ -263,17 +248,19 @@ class SlackView(object):
                 }
             },
             {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Percent Threshold Exceed Probability (Unweighted) : `{price_change_estimate.percentProbability(percent, weighted=False)}`"
-                }
+                "type": "image",
+                "title": {
+                    "type": "plain_text",
+                    "text": "Weekly Price Change Distribution"
+                },
+                "image_url": pdc.get_short_url(),
+                "alt_text": "Weekly Price Change Distribution"
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Percent Threshold Exceed Probability (Weighted) : `{price_change_estimate.percentProbability(percent)}`"
+                    "text": f"Percent Threshold (`{percent}%`) Exceed Probability : `{price_change_estimate.percentProbability(percent)}%`"
                 }
             }
         ]

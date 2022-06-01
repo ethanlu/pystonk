@@ -47,8 +47,7 @@ class TerminalView(object):
             )
         print(f"Percent Change Mean: {price_change_estimate.mean()}")
         print(f"Percent Change STD: {price_change_estimate.std()}")
-        print(f"Percent Threshold Exceed Probability (Unweighted): {price_change_estimate.percentProbability(percent, weighted=False)}")
-        print(f"Percent Threshold Exceed Probability (Weighted)  : {price_change_estimate.percentProbability(percent)}")
+        print(f"Percent Threshold ({percent}%) Exceed Probability : {price_change_estimate.percentProbability(percent)}")
         print()
 
     def showOptionsChain(self, symbol: str, premium: float, current_price: float, data: Iterable, sell_options: Optional[NamedTuple], buy_options: Optional[NamedTuple]):
