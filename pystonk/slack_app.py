@@ -14,12 +14,12 @@ from typing import Tuple
 
 import re
 
-
 config = ConfigFactory.parse_file(get_conf_path())
+logger = getLogger('pystonk')
 app = App(
     token=config['slack']['token'],
     signing_secret=config['slack']['secret'],
-    logger=getLogger('pystonk'),
+    logger=logger,
     process_before_response=config['slack']['lambda']
 )
 
@@ -94,14 +94,13 @@ def parse_command(text: str) -> Tuple:
     return None, None
 
 
-def send_ack(body, ack):
-    ack("one moment...")
-
-
 @app.event("app_mention")
-def mention(client, event, logger):
+def mention(ack, client, event, body):
+    ack("one moment...")
     try:
-        logger.debug(event)
+        logger.debug(f"event : `{event}`")
+        logger.debug(f"body : `{body}`")
+
         view = SlackView()
         handler, args = parse_command(event['text'])
         if not handler:
@@ -112,7 +111,6 @@ def mention(client, event, logger):
             text_response = response[0]
             block_response = response[1]
 
-        logger.debug(f"channel : {event['channel']}")
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
@@ -125,10 +123,12 @@ def mention(client, event, logger):
         logger.error(f"Error publishing mention: {e}")
 
 
-def slash_command(respond, body):
+@app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))
+def slash_command(ack, client, event, body):
+    ack("one moment...")
     try:
-        logger = getLogger('pystonk')
-        logger.debug(body)
+        logger.debug(f"event : `{event}`")
+        logger.debug(f"body : `{body}`")
 
         view = SlackView()
         handler, args = parse_command(body['text'] if 'text' in body else '')
@@ -143,18 +143,14 @@ def slash_command(respond, body):
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
-        respond(
+        client.chat_postEphemeral(
+            channel=body['channel_id'],
+            user=body['user_id'],
             blocks=block_response,
             text=text_response
         )
     except Exception as e:
         logger.error(f"Error publishing mention: {e}")
-
-
-app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))(
-    ack=send_ack,
-    lazy=[slash_command]
-)
 
 
 def lambda_handler(event, context):
