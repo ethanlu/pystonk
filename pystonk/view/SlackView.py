@@ -204,9 +204,6 @@ class SlackView(object):
             },
             "options": {
                 "scales": {
-                    "y": {
-                        "beginAtZero": True
-                    },
                     "xAxes": [{
                         "scaleLabel": {
                             "display": True,
@@ -214,6 +211,9 @@ class SlackView(object):
                         }
                     }],
                     "yAxes": [{
+                        "ticks": {
+                            "min": 0
+                        },
                         "scaleLabel": {
                             "display": True,
                             "labelString": "Count"
