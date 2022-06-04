@@ -10,8 +10,11 @@ from pystonk.utils.LoggerMixin import getLogger
 from pyhocon import ConfigFactory
 from slack_bolt import App
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
+from slack_sdk import WebClient
 from typing import Tuple
 
+import boto3
+import json
 import re
 
 config = ConfigFactory.parse_file(get_conf_path())
@@ -20,8 +23,10 @@ app = App(
     token=config['slack']['token'],
     signing_secret=config['slack']['secret'],
     logger=logger,
-    process_before_response=config['slack']['lambda']
+    process_before_response=False
 )
+slack_web_client = WebClient(token=config['slack']['token'])
+lambda_client = boto3.client('lambda')
 
 
 def pc_handler(*args) -> Tuple:
@@ -95,15 +100,34 @@ def parse_command(text: str) -> Tuple:
 
 
 @app.event("app_mention")
-def mention(ack, client, event, body):
-    ack("one moment...")
-    try:
-        logger.debug(f"event : `{event}`")
-        logger.debug(f"body : `{body}`")
+def receive_mention(ack, event, body):
+    logger.debug(f"event : `{event}`")
+    logger.debug(f"body : `{body}`")
 
-        view = SlackView()
-        handler, args = parse_command(event['text'])
+    payload = {
+        "f": "respond_mention",
+        "p": [event['text'], event['channel']]
+    }
+
+    if config['slack']['lambda']:
+        # app is running with lambda, so need to process response using second lambda call
+        lambda_client.invoke(
+            FunctionName=config['aws']['lambda_arn'],
+            InvocationType='Event',
+            Payload=json.dumps(payload)
+        )
+        ack("one moment...")
+    else:
+        # app is running without lambda, so process immediately
+        ack("one moment...")
+        respond_lambda_handler(payload, None)
+
+
+def respond_mention(text: str, channel_id: str):
+    try:
+        handler, args = parse_command(text)
         if not handler:
+            view = SlackView()
             text_response = "Invalid command"
             block_response = view.showAvailableCommands()
         else:
@@ -114,8 +138,8 @@ def mention(ack, client, event, body):
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
-        client.chat_postMessage(
-            channel=event['channel'],
+        slack_web_client.chat_postMessage(
+            channel=channel_id,
             blocks=block_response,
             text=text_response
         )
@@ -124,15 +148,34 @@ def mention(ack, client, event, body):
 
 
 @app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))
-def slash_command(ack, client, event, body):
-    ack("one moment...")
-    try:
-        logger.debug(f"event : `{event}`")
-        logger.debug(f"body : `{body}`")
+def receive_slash_command(ack, event, body):
+    logger.debug(f"event : `{event}`")
+    logger.debug(f"body : `{body}`")
 
-        view = SlackView()
-        handler, args = parse_command(body['text'] if 'text' in body else '')
+    payload = {
+        "f": "respond_slash_command",
+        "p": [body['text'], body['user_id'], body['channel_id']]
+    }
+
+    if config['slack']['lambda']:
+        # app is running with lambda, so need to process response using second lambda call
+        lambda_client.invoke(
+            FunctionName=config['aws']['lambda_arn'],
+            InvocationType='Event',
+            Payload=json.dumps(payload)
+        )
+        ack("one moment...")
+    else:
+        # app is running without lambda, so process immediately
+        ack("one moment...")
+        respond_lambda_handler(payload, None)
+
+
+def respond_slash_command(text: str, user_id: str, channel_id: str):
+    try:
+        handler, args = parse_command(text)
         if not handler:
+            view = SlackView()
             text_response = "Invalid command"
             block_response = view.showAvailableCommands()
         else:
@@ -143,9 +186,9 @@ def slash_command(ack, client, event, body):
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
-        client.chat_postEphemeral(
-            channel=body['channel_id'],
-            user=body['user_id'],
+        slack_web_client.chat_postEphemeral(
+            channel=channel_id,
+            user=user_id,
             blocks=block_response,
             text=text_response
         )
@@ -153,8 +196,15 @@ def slash_command(ack, client, event, body):
         logger.error(f"Error publishing mention: {e}")
 
 
-def lambda_handler(event, context):
+def receive_lambda_handler(event, context):
     return SlackRequestHandler(app=app).handle(event, context)
+
+def respond_lambda_handler(event, context):
+    logger.debug(event)
+    logger.debug(context)
+
+    f = globals()[event['f']]
+    f(*event['p'])
 
 
 def start():
