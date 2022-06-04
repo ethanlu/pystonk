@@ -11,7 +11,7 @@ from pyhocon import ConfigFactory
 from slack_bolt import App
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from slack_sdk import WebClient
-from typing import Tuple
+from typing import Callable, Dict, Tuple
 
 import boto3
 import json
@@ -26,7 +26,7 @@ app = App(
     process_before_response=False
 )
 slack_web_client = WebClient(token=config['slack']['token'])
-lambda_client = boto3.client('lambda')
+lambda_client = boto3.client('lambda', region_name=config['aws']['region'])
 
 
 def pc_handler(*args) -> Tuple:
@@ -99,18 +99,11 @@ def parse_command(text: str) -> Tuple:
     return None, None
 
 
-@app.event("app_mention")
-def receive_mention(ack, event, body):
-    logger.debug(f"event : `{event}`")
-    logger.debug(f"body : `{body}`")
-
-    payload = {
-        "f": "respond_mention",
-        "p": [event['text'], event['channel']]
-    }
-
-    if config['slack']['lambda']:
+def dispatch_reponse(ack: Callable, payload: Dict) -> None:
+    logger.debug(f"aws lambda arn is `{config['aws']['lambda_arn']}`")
+    if config['aws']['lambda_arn']:
         # app is running with lambda, so need to process response using second lambda call
+        logger.debug(f"handling slack response via lambda:  `{config['aws']['lambda_arn']}`")
         lambda_client.invoke(
             FunctionName=config['aws']['lambda_arn'],
             InvocationType='Event',
@@ -119,8 +112,23 @@ def receive_mention(ack, event, body):
         ack("one moment...")
     else:
         # app is running without lambda, so process immediately
+        logger.debug(f"handling slack response via direct call")
         ack("one moment...")
-        respond_lambda_handler(payload, None)
+        slack_lambda_responder(payload, None)
+
+
+@app.event("app_mention")
+def receive_mention(ack, event, body):
+    logger.debug(f"event : `{event}`")
+    logger.debug(f"body : `{body}`")
+
+    dispatch_reponse(
+        ack,
+        {
+            "f": "respond_mention",
+            "p": [event['text'], event['channel']]
+        }
+    )
 
 
 def respond_mention(text: str, channel_id: str):
@@ -152,23 +160,13 @@ def receive_slash_command(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    payload = {
-        "f": "respond_slash_command",
-        "p": [body['text'], body['user_id'], body['channel_id']]
-    }
-
-    if config['slack']['lambda']:
-        # app is running with lambda, so need to process response using second lambda call
-        lambda_client.invoke(
-            FunctionName=config['aws']['lambda_arn'],
-            InvocationType='Event',
-            Payload=json.dumps(payload)
-        )
-        ack("one moment...")
-    else:
-        # app is running without lambda, so process immediately
-        ack("one moment...")
-        respond_lambda_handler(payload, None)
+    dispatch_reponse(
+        ack,
+        {
+            "f": "respond_slash_command",
+            "p": [body['text'], body['user_id'], body['channel_id']]
+        }
+    )
 
 
 def respond_slash_command(text: str, user_id: str, channel_id: str):
@@ -196,10 +194,10 @@ def respond_slash_command(text: str, user_id: str, channel_id: str):
         logger.error(f"Error publishing mention: {e}")
 
 
-def receive_lambda_handler(event, context):
+def slack_lambda_receiver(event, context):
     return SlackRequestHandler(app=app).handle(event, context)
 
-def respond_lambda_handler(event, context):
+def slack_lambda_responder(event, context):
     logger.debug(event)
     logger.debug(context)
 
