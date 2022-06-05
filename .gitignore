@@ -136,3 +136,4 @@ dmypy.json
 
 # pystonk
 pystonk/conf/app.conf
+pystonk-slack-receive-package.zip
