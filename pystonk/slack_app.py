@@ -20,7 +20,7 @@ app = App(
     token=config['slack']['token'],
     signing_secret=config['slack']['secret'],
     logger=logger,
-    process_before_response=False
+    process_before_response=config['slack']['lambda']
 )
 slack_web_client = WebClient(token=config['slack']['token'])
 
@@ -95,7 +95,7 @@ def parse_command(text: str) -> Tuple:
     return None, None
 
 
-def dispatch_reponse(ack: Callable, payload: Dict) -> None:
+def dispatch_response(ack: Callable, payload: Dict) -> None:
     ack("one moment...")
     slack_responder(payload, None)
 
@@ -105,7 +105,7 @@ def receive_mention(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_reponse(
+    dispatch_response(
         ack,
         {
             "f": "respond_mention",
@@ -143,7 +143,7 @@ def receive_slash_command(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_reponse(
+    dispatch_response(
         ack,
         {
             "f": "respond_slash_command",

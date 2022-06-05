@@ -16,12 +16,12 @@ app = App(
     token=config['slack']['token'],
     signing_secret=config['slack']['secret'],
     logger=logger,
-    process_before_response=False
+    process_before_response=config['slack']['lambda']
 )
 lambda_client = boto3.client('lambda', region_name=config['aws']['region'])
 
 
-def dispatch_reponse(ack: Callable, payload: Dict) -> None:
+def dispatch_response(ack: Callable, payload: Dict) -> None:
     logger.debug(f"aws lambda arn is `{config['aws']['lambda_arn']}`")
     lambda_client.invoke(
         FunctionName=config['aws']['lambda_arn'],
@@ -36,7 +36,7 @@ def receive_mention(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_reponse(
+    dispatch_response(
         ack,
         {
             "f": "respond_mention",
@@ -50,7 +50,7 @@ def receive_slash_command(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_reponse(
+    dispatch_response(
         ack,
         {
             "f": "respond_slash_command",
