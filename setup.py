@@ -1,7 +1,33 @@
 from setuptools import setup, find_packages
 
+import os
+
 with open('README.md', 'r') as fh:
     long_description = fh.read()
+
+
+def load_requirements():
+    if os.getenv('PYSTONK_LAMBDA_DEPLOY'):
+        # only used for deploying first lambda function to aws (for production)
+        return [
+            "boto3",
+            "pyhocon",
+            "slack_bolt"
+        ]
+    else:
+        #  used for all other situations
+        return [
+            "boto3",
+            "numpy",
+            "prettytable",
+            "pyhocon",
+            "quickchart.io",
+            "requests",
+            "scipy",
+            "slack_bolt",
+            "termcolor",
+            "wheel"
+        ]
 
 setup(
     name="pystonk",
@@ -21,18 +47,7 @@ setup(
     python_requires='>3.6',
     packages=find_packages(),
     package_data={'pystonk': ['conf/*.conf']},
-    install_requires=[
-        "boto3",
-        "numpy",
-        "prettytable",
-        "pyhocon",
-        "quickchart.io",
-        "requests",
-        "scipy",
-        "slack_bolt",
-        "termcolor",
-        "wheel"
-    ],
+    install_requires=load_requirements(),
     tests_require=[
         "coverage",
         "mock"

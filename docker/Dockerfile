@@ -1,11 +1,12 @@
-FROM python:3.9-slim
+FROM public.ecr.aws/lambda/python:3.9
 
 COPY . /opt/app
 WORKDIR /opt/app
 
-RUN apt-get update
+# remove custom app.conf if it exists
+RUN rm -rf /opt/app/pystonk/conf/app.conf
 
 RUN pip install --no-cache-dir --upgrade pip \
     && python setup.py develop
 
-ENTRYPOINT ["/bin/bash", "docker/entrypoint.sh"]
+CMD [ "pystonk.slack_app.slack_lambda_receiver" ]

@@ -9,8 +9,8 @@ from pystonk.utils.LoggerMixin import getLogger
 
 from pyhocon import ConfigFactory
 from slack_bolt import App
-from slack_bolt.adapter.aws_lambda import SlackRequestHandler
-from typing import Tuple
+from slack_sdk import WebClient
+from typing import Callable, Dict, Tuple
 
 import re
 
@@ -22,6 +22,7 @@ app = App(
     logger=logger,
     process_before_response=config['slack']['lambda']
 )
+slack_web_client = WebClient(token=config['slack']['token'])
 
 
 def pc_handler(*args) -> Tuple:
@@ -94,16 +95,30 @@ def parse_command(text: str) -> Tuple:
     return None, None
 
 
-@app.event("app_mention")
-def mention(ack, client, event, body):
+def dispatch_response(ack: Callable, payload: Dict) -> None:
     ack("one moment...")
-    try:
-        logger.debug(f"event : `{event}`")
-        logger.debug(f"body : `{body}`")
+    slack_responder(payload, None)
 
-        view = SlackView()
-        handler, args = parse_command(event['text'])
+
+@app.event("app_mention")
+def receive_mention(ack, event, body):
+    logger.debug(f"event : `{event}`")
+    logger.debug(f"body : `{body}`")
+
+    dispatch_response(
+        ack,
+        {
+            "f": "respond_mention",
+            "p": [event['text'], event['channel']]
+        }
+    )
+
+
+def respond_mention(text: str, channel_id: str):
+    try:
+        handler, args = parse_command(text)
         if not handler:
+            view = SlackView()
             text_response = "Invalid command"
             block_response = view.showAvailableCommands()
         else:
@@ -114,8 +129,8 @@ def mention(ack, client, event, body):
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
-        client.chat_postMessage(
-            channel=event['channel'],
+        slack_web_client.chat_postMessage(
+            channel=channel_id,
             blocks=block_response,
             text=text_response
         )
@@ -124,15 +139,24 @@ def mention(ack, client, event, body):
 
 
 @app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))
-def slash_command(ack, client, event, body):
-    ack("one moment...")
-    try:
-        logger.debug(f"event : `{event}`")
-        logger.debug(f"body : `{body}`")
+def receive_slash_command(ack, event, body):
+    logger.debug(f"event : `{event}`")
+    logger.debug(f"body : `{body}`")
 
-        view = SlackView()
-        handler, args = parse_command(body['text'] if 'text' in body else '')
+    dispatch_response(
+        ack,
+        {
+            "f": "respond_slash_command",
+            "p": [body['text'], body['user_id'], body['channel_id']]
+        }
+    )
+
+
+def respond_slash_command(text: str, user_id: str, channel_id: str):
+    try:
+        handler, args = parse_command(text)
         if not handler:
+            view = SlackView()
             text_response = "Invalid command"
             block_response = view.showAvailableCommands()
         else:
@@ -143,9 +167,9 @@ def slash_command(ack, client, event, body):
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
-        client.chat_postEphemeral(
-            channel=body['channel_id'],
-            user=body['user_id'],
+        slack_web_client.chat_postEphemeral(
+            channel=channel_id,
+            user=user_id,
             blocks=block_response,
             text=text_response
         )
@@ -153,8 +177,12 @@ def slash_command(ack, client, event, body):
         logger.error(f"Error publishing mention: {e}")
 
 
-def lambda_handler(event, context):
-    return SlackRequestHandler(app=app).handle(event, context)
+def slack_responder(event, context):
+    logger.debug(event)
+    logger.debug(context)
+
+    f = globals()[event['f']]
+    f(*event['p'])
 
 
 def start():
