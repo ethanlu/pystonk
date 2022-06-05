@@ -9,12 +9,9 @@ from pystonk.utils.LoggerMixin import getLogger
 
 from pyhocon import ConfigFactory
 from slack_bolt import App
-from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from slack_sdk import WebClient
 from typing import Callable, Dict, Tuple
 
-import boto3
-import json
 import re
 
 config = ConfigFactory.parse_file(get_conf_path())
@@ -26,7 +23,6 @@ app = App(
     process_before_response=False
 )
 slack_web_client = WebClient(token=config['slack']['token'])
-lambda_client = boto3.client('lambda', region_name=config['aws']['region'])
 
 
 def pc_handler(*args) -> Tuple:
@@ -100,21 +96,8 @@ def parse_command(text: str) -> Tuple:
 
 
 def dispatch_reponse(ack: Callable, payload: Dict) -> None:
-    logger.debug(f"aws lambda arn is `{config['aws']['lambda_arn']}`")
-    if config['aws']['lambda_arn']:
-        # app is running with lambda, so need to process response using second lambda call
-        logger.debug(f"handling slack response via lambda:  `{config['aws']['lambda_arn']}`")
-        lambda_client.invoke(
-            FunctionName=config['aws']['lambda_arn'],
-            InvocationType='Event',
-            Payload=json.dumps(payload)
-        )
-        ack("one moment...")
-    else:
-        # app is running without lambda, so process immediately
-        logger.debug(f"handling slack response via direct call")
-        ack("one moment...")
-        slack_lambda_responder(payload, None)
+    ack("one moment...")
+    slack_responder(payload, None)
 
 
 @app.event("app_mention")
@@ -194,10 +177,7 @@ def respond_slash_command(text: str, user_id: str, channel_id: str):
         logger.error(f"Error publishing mention: {e}")
 
 
-def slack_lambda_receiver(event, context):
-    return SlackRequestHandler(app=app).handle(event, context)
-
-def slack_lambda_responder(event, context):
+def slack_responder(event, context):
     logger.debug(event)
     logger.debug(context)
 
