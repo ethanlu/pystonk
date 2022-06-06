@@ -23,11 +23,13 @@ lambda_client = boto3.client('lambda', region_name=config['aws']['region'])
 
 def dispatch_response(ack: Callable, payload: Dict) -> None:
     logger.debug(f"aws lambda arn is `{config['aws']['lambda_arn']}`")
+    # call the second lambda to do the processing
     lambda_client.invoke(
         FunctionName=config['aws']['lambda_arn'],
         InvocationType='Event',
         Payload=json.dumps(payload)
     )
+    # but respond immediately so that slack does not cancel the request
     ack("one moment...")
 
 

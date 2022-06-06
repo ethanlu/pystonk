@@ -4,7 +4,11 @@ from pystonk.api.OptionsChainApi import OptionsChainApi
 from pystonk.api.QuoteApi import QuoteApi
 from pystonk.reports.WeeklyPriceChangeReport import WeeklyPriceChangeReport
 from pystonk.reports.WeeklyOptionsReport import WeeklyOptionsReport
-from pystonk.view.SlackView import SlackView
+from pystonk.view.ErrorView import ErrorView
+from pystonk.view.HelpView import HelpView
+from pystonk.view.OptionsChainView import OptionsChainView
+from pystonk.view.PriceCheckView import PriceCheckView
+from pystonk.view.PriceHistoryView import PriceHistoryView
 from pystonk.utils.LoggerMixin import getLogger
 
 from pyhocon import ConfigFactory
@@ -31,9 +35,9 @@ def pc_handler(*args) -> Tuple:
         api = QuoteApi(config['api_key'])
         price = api.getQuote(symbol)
 
-        return f"{symbol} is currently {round(float(price), 2) if price else 'not found'}", SlackView().showPriceCheck(symbol, price)
+        return f"{symbol} is currently {round(float(price), 2) if price else 'not found'}", PriceCheckView(symbol, price).show()
     except Exception as e:
-        return SlackView().showUnexpectedError(str(e))
+        return str(e), ErrorView(str(e)).show()
 
 
 def ph_handler(*args) -> Tuple:
@@ -45,8 +49,7 @@ def ph_handler(*args) -> Tuple:
         )
         r.retrieveData(symbol)
 
-        view = SlackView()
-        response = view.showPriceHistory(
+        view = PriceHistoryView(
             symbol=symbol,
             percent=percent,
             data=r.generate(percent),
@@ -56,9 +59,9 @@ def ph_handler(*args) -> Tuple:
             price_change_estimate=r.priceChangeEstimate()
         )
 
-        return f"price history for {symbol} with {percent} threshold", response
+        return f"price history for {symbol} with {percent} threshold", view.show()
     except Exception as e:
-        return SlackView().showUnexpectedError(str(e))
+        return str(e), ErrorView(str(e)).show()
 
 
 def oc_handler(*args) -> Tuple:
@@ -71,8 +74,7 @@ def oc_handler(*args) -> Tuple:
         )
         r.retrieveData(symbol)
 
-        view = SlackView()
-        response = view.showOptionsChain(
+        view = OptionsChainView(
             symbol=symbol,
             premium=premium,
             current_price=r.getMark(),
@@ -81,9 +83,9 @@ def oc_handler(*args) -> Tuple:
             buy_options=r.getStrikePricesForTargetPremium(premium, is_sell=False)
         )
 
-        return f"option chain for {symbol} with {premium} premium", response
+        return f"option chain for {symbol} with {premium} premium", view.show()
     except Exception as e:
-        return SlackView().showUnexpectedError(str(e))
+        return str(e), ErrorView(str(e)).show()
 
 
 def parse_command(text: str) -> Tuple:
@@ -118,9 +120,8 @@ def respond_mention(text: str, channel_id: str):
     try:
         handler, args = parse_command(text)
         if not handler:
-            view = SlackView()
             text_response = "Invalid command"
-            block_response = view.showAvailableCommands()
+            block_response = HelpView().show()
         else:
             response = handler(*args)
             text_response = response[0]
@@ -156,9 +157,8 @@ def respond_slash_command(text: str, user_id: str, channel_id: str):
     try:
         handler, args = parse_command(text)
         if not handler:
-            view = SlackView()
             text_response = "Invalid command"
-            block_response = view.showAvailableCommands()
+            block_response = HelpView().show()
         else:
             response = handler(*args)
             text_response = response[0]

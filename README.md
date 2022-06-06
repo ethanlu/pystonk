@@ -18,21 +18,12 @@ This tool uses [TD Amertrade's API](https://developer.tdameritrade.com/apis) dat
 For running this as a Slack app locally, it will need an Ngrok auth token:
 * [create an account and get an auth token](https://ngrok.com/)
 
-## Console App
-### Docker
-Create a `.env` file and add these environment variables to it:
-```shell script
-PYSTONK_MODE=terminal
-PYSTONK_API_KEY={key from td ameritrade}
-```
+## Local Run
+### Ngrok
+Setup a Ngrok access point so that traffic from Slack can reach your local app. The request URL that is needed for Slack events and 
+slash commands should use:
+`https://{ngrok endpoint}/slack/events`
 
-Build and run project
-```shell script
-docker-compose build
-docker-compose run pystonk
-```
-
-## Slack App
 ### Configure Slack App
 PyStonk can be setup as a Slack application! It is not distributed publicly, so will need to be manually installed into your
 desired Slack workspace.
@@ -50,7 +41,6 @@ desired Slack workspace.
 ### Docker
 Create a `.env` file and add these environment variables to it:
 ```shell script
-PYSTONK_MODE=slack
 PYSTONK_API_KEY={key from td ameritrade}
 PYSTONK_SLACK_TOKEN={slack bot user oauth token}
 PYSTONK_SLACK_SECRET={slack app signing secret}
@@ -60,7 +50,7 @@ NGROK_AUTHTOKEN={ngrok auth token}
 Build and run project
 ```shell script
 docker-compose build
-docker-compose run pystonk
+docker-compose up -d
 ```
 
 ## TODO
