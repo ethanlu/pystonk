@@ -1,46 +1,40 @@
-from pystonk.reports.WeeklyOptionsReport import WeeklyOptionsReport
+from pystonk.models.OptionsChain import OptionsChain
 from pystonk.views import View
 
 from prettytable import PrettyTable
-from typing import Dict, Iterable, List, NamedTuple, Optional
+from typing import Dict, List
 
 import random
 
 
 class OptionsChainView(View):
-    def __init__(self, symbol: str, premium: float, report: WeeklyOptionsReport):
+    def __init__(self, symbol: str, premium: float, latest_price: float, options_chain: OptionsChain):
         super().__init__()
 
         self._symbol = symbol
         self._premium = premium
-        self._report = report
+        self._latest_price = latest_price
+        self._options_chain = options_chain
 
-        self._current_price = self._report.getMark(),
-        self._data = self._report.generate()
-        self._sell_options = self._report.getStrikePricesForTargetPremium(self._premium)
-        self._buy_options = self._report.getStrikePricesForTargetPremium(premium, is_sell=False)
+        self._sell_call = self._options_chain.closestCallOption(self._premium)
+        self._buy_call = self._options_chain.closestCallOption(self._premium, is_sell=False)
+
+        self._sell_put = self._options_chain.closestPutOption(self._premium)
+        self._buy_put = self._options_chain.closestPutOption(self._premium, is_sell=False)
 
         # options table
         self._t = PrettyTable()
         self._t.field_names = ('  ', 'Call Bid', 'Call Ask', 'Put Bid', 'Put Ask', 'Strike', '% Change')
 
-        sell_call = sell_put = buy_call = buy_put = None
-        if self._sell_options:
-            sell_call = self._sell_options.call
-            sell_put = self._sell_options.put
-        if self._buy_options:
-            buy_call = self._buy_options.call
-            buy_put = self._buy_options.put
-
-        for (strike_price, percent_change, call_option, put_option) in self._data:
+        for (strike_price, percent_change, call_option, put_option) in self._options_chain.matrix():
             flag = ''
-            if call_option == sell_call:
+            if call_option == self._sell_call:
                 flag += 'c'
-            if call_option == buy_call:
+            if call_option == self._buy_call:
                 flag += 'C'
-            if put_option == sell_put:
+            if put_option == self._sell_put:
                 flag += 'p'
-            if put_option == buy_put:
+            if put_option == self._buy_put:
                 flag += 'P'
 
             self._t.add_row((
@@ -85,75 +79,85 @@ class OptionsChainView(View):
             )
             i += self.SLACK_BLOCK_LIMIT
 
-        if self._sell_options:
+        if self._sell_call or self._sell_put:
             response.append(
                 {
                     "type": "divider"
                 }
             )
-            response.append(
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"`c` : Closest `{self._sell_options.call.expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-call is `{self._sell_options.call.strikePrice}`\nWhich is `{self._sell_options.call_diff}` from current price of `{self._current_price}` (`{self._sell_options.call_diff_percent}%`)"
+
+            if self._sell_call:
+                response.append(
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"`c` : Closest `{self._sell_call[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-call is `{self._sell_call[0].strikePrice}`\nWhich is `{self._sell_call[1]}` from current price of `{self._latest_price}` (`{self._sell_call[2]}%`)"
+                        }
                     }
-                }
-            )
-            response.append(
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"`p` : Closest `{self._sell_options.put.expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-put is `{self._sell_options.put.strikePrice}`\nWhich is `{self._sell_options.put_diff}` from current price of `{self._current_price}` (`{self._sell_options.put_diff_percent}%`)"
+                )
+
+            if self._sell_put:
+                response.append(
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"`p` : Closest `{self._sell_put[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-put is `{self._sell_put[0].strikePrice}`\nWhich is `{self._sell_put[1]}` from current price of `{self._latest_price}` (`{self._sell_put[2]}%`)"
+                        }
                     }
-                }
-            )
+                )
+
             response.append(
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"`{self._premium}` premium for sell options has a skew of `{round(self._sell_options.call_diff + self._sell_options.put_diff, 2)}`"
+                        "text": f"`{self._premium}` premium for sell options has a skew of `{round(self._sell_call[1] + self._sell_put[1], 2)}`"
                     }
                 }
             )
 
-        if self._buy_options:
+        if self._buy_call or self._buy_put:
             response.append(
                 {
                     "type": "divider"
                 }
             )
-            response.append(
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"`C` : Closest `{self._buy_options.call.expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-call is `{self._buy_options.call.strikePrice}`\nWhich is `{self._buy_options.call_diff}` from current price of `{self._current_price}` (`{self._buy_options.call_diff_percent}%`)"
+
+            if self._buy_call:
+                response.append(
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"`C` : Closest `{self._buy_call[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-call is `{self._buy_call[0].strikePrice}`\nWhich is `{self._buy_call[1]}` from current price of `{self._latest_price}` (`{self._buy_call[2]}%`)"
+                        }
                     }
-                }
-            )
-            response.append(
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"`P` : Closest `{self._buy_options.put.expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-put is `{self._buy_options.put.strikePrice}`\nWhich is `{self._buy_options.put_diff}` from current price of `{self._current_price}` (`{self._buy_options.put_diff_percent}%`)"
+                )
+
+            if self._buy_put:
+                response.append(
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"`P` : Closest `{self._buy_put[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-put is `{self._buy_put[0].strikePrice}`\nWhich is `{self._buy_put[1]}` from current price of `{self._latest_price}` (`{self._buy_put[2]}%`)"
+                        }
                     }
-                }
-            )
+                )
+
             response.append(
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"`{self._premium}` premium for buy options has a skew of `{round(self._buy_options.call_diff + self._buy_options.put_diff, 2)}`"
+                        "text": f"`{self._premium}` premium for buy options has a skew of `{round(self._buy_call[1] + self._buy_put[1], 2)}`"
                     }
                 }
             )
 
-        if not self._sell_options and not self._buy_options:
+        if not self._sell_call and not self._sell_put and not self._buy_call and not self._buy_put:
             response.append(
                 {
                     "type": "section",

@@ -6,11 +6,10 @@ from pystonk.views.ErrorView import ErrorView
 from pystonk.views.HelpView import HelpView
 
 from abc import abstractmethod
-from argparse import Action, ArgumentError, Namespace, RawDescriptionHelpFormatter
-from typing import List, Type
+from argparse import ArgumentError, Namespace, RawDescriptionHelpFormatter
+from typing import Type
 
 import re
-import sys
 
 
 class Command(LoggerMixin):
@@ -54,4 +53,5 @@ class Command(LoggerMixin):
         except ArgumentError:
             return HelpView([self.help()])
         except:
-            return ErrorView(f"Unexpected error while processing command : {sys.exc_info()[0]}")
+            self.logger.exception(f"Unexpected error while processing command...")
+            return ErrorView(f"Unexpected error while processing command...some shit broke! Tell creator to check logs and fix it!")

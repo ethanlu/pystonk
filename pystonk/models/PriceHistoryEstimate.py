@@ -6,8 +6,8 @@ from typing import List, Tuple
 import numpy as np
 
 
-class PriceChangeEstimate(object):
-    def __init__(self, data: List[CandleStick], bins=10):
+class PriceHistoryEstimate(object):
+    def __init__(self, data: List[CandleStick]):
         self._raw_data = data
         self._data = [c.percentChange for c in self._raw_data]
         self._mean = np.mean(self._data)

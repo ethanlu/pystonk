@@ -1,6 +1,8 @@
+from pystonk.api.Types import FrequencyType, PeriodType
 from pystonk.api.PriceHistoryApi import PriceHistoryApi
 from pystonk.commands import Command
-from pystonk.reports.WeeklyPriceChangeReport import WeeklyPriceChangeReport
+from pystonk.models.PriceHistory import PriceHistory
+from pystonk.models.PriceHistoryEstimate import PriceHistoryEstimate
 from pystonk.utils.CustomArgParser import CustomArgParser
 from pystonk.views import View
 from pystonk.views.PriceHistoryView import PriceHistoryView
@@ -34,7 +36,6 @@ class PriceHistoryCommand(Command):
         )
 
         self._price_history_api = price_history_api
-        self._report = WeeklyPriceChangeReport(self._price_history_api)
 
     @property
     def command_regex(self) -> re.Pattern:
@@ -48,10 +49,17 @@ class PriceHistoryCommand(Command):
         symbol = args.symbol.upper()
         percent = abs(round(args.percent, 2))
 
-        self._report.retrieveData(symbol)
+        candlesticks = self._price_history_api.getPriceHistory(
+            symbol=symbol,
+            period_type=PeriodType.YEAR,
+            period=1,
+            frequency_type=FrequencyType.WEEKLY,
+            frequency=1
+        )
 
         return PriceHistoryView(
             symbol=symbol,
             percent=percent,
-            report=self._report
+            price_history=PriceHistory(candlesticks),
+            price_history_estimate=PriceHistoryEstimate(candlesticks)
         )

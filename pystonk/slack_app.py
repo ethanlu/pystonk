@@ -8,7 +8,6 @@ from slack_sdk import WebClient
 from typing import Callable, Dict, Type
 
 import re
-import sys
 
 logger = getLogger('pystonk')
 app = App(
@@ -67,7 +66,7 @@ def respond_mention(text: str, channel_id: str):
             text=text_response
         )
     except:
-        logger.error(f"Unexpected error occurred: {sys.exc_info()}")
+        logger.exception(f"Unexpected error occurred...")
 
 
 @app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))
@@ -101,7 +100,7 @@ def respond_slash_command(text: str, user_id: str, channel_id: str):
             text=text_response
         )
     except Exception as e:
-        logger.error(f"Unexpected error occurred: {sys.exc_info()}")
+        logger.exception(f"Unexpected error occurred...")
 
 
 def slack_responder(event, context):

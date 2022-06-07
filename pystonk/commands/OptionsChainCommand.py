@@ -1,12 +1,13 @@
 from pystonk.api.OptionsChainApi import OptionsChainApi
 from pystonk.api.QuoteApi import QuoteApi
 from pystonk.commands import Command
-from pystonk.reports.WeeklyOptionsReport import WeeklyOptionsReport
+from pystonk.models.OptionsChain import OptionsChain
 from pystonk.utils.CustomArgParser import CustomArgParser
 from pystonk.views import View
 from pystonk.views.OptionsChainView import OptionsChainView
 
 from argparse import Namespace
+from datetime import date
 from typing import Type
 
 import re
@@ -36,7 +37,6 @@ class OptionsChainCommand(Command):
 
         self._options_chain_api = options_chain_api
         self._quote_api = quote_api
-        self._report = WeeklyOptionsReport(self._quote_api, self._options_chain_api)
 
     @property
     def command_regex(self) -> re.Pattern:
@@ -50,10 +50,18 @@ class OptionsChainCommand(Command):
         symbol = args.symbol.upper()
         premium = abs(round(args.premium, 2))
 
-        self._report.retrieveData(symbol)
+        latest_price = self._quote_api.getQuote(symbol)
 
         return OptionsChainView(
             symbol=symbol,
             premium=premium,
-            report=self._report
+            latest_price=latest_price,
+            options_chain=OptionsChain(
+                latest_price,
+                self._options_chain_api.getWeeklySingleOptionChain(
+                    symbol=symbol,
+                    week_date=date.today(),
+                    strike_count=200
+                )
+            )
         )
