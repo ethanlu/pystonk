@@ -15,7 +15,7 @@ class PriceHistory(LoggerMixin):
         return len(self._candlesticks)
 
     def countIntervalsExceedPercentThreshold(self, percent: float) -> int:
-        return len([1 for c in self._candlesticks if c.percentChange >= percent])
+        return len([1 for c in self._candlesticks if abs(c.percentChange) >= percent])
 
     def percentProbability(self, percent: float):
         return round((self.countIntervalsExceedPercentThreshold(percent)/self.countIntervals()) * 100, 2)

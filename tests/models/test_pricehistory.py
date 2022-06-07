@@ -1,20 +1,15 @@
 from pystonk.api.Types import FrequencyType
 from pystonk.models.CandleStick import CandleStick
-from pystonk.reports.WeeklyPriceChangeReport import WeeklyPriceChangeReport
+from pystonk.models.PriceHistory import PriceHistory
 
 
 from datetime import datetime
-from mock import MagicMock
 from unittest import TestCase
 
 
-class WeeklyPriceChangeReportTest(TestCase):
+class PriceHistoryTest(TestCase):
     def setUp(self) -> None:
-        self._mock_api = MagicMock()
-        self._mock_api.getPriceHistory.return_value = self.fixture3MonthApiResponse()
-
-    def fixture3MonthApiResponse(self):
-        return [
+        self._candlesticks = [
             CandleStick(100.00, 120.00, 80.00, 105.00, 100, int(datetime.strptime('2022-01-03', '%Y-%m-%d').timestamp() * 1000), FrequencyType.WEEKLY), # +5%
             CandleStick(100.00, 120.00, 80.00, 95.00, 100, int(datetime.strptime('2022-01-10', '%Y-%m-%d').timestamp() * 1000), FrequencyType.WEEKLY), # -5%
             CandleStick(100.00, 120.00, 80.00, 103.00, 100, int(datetime.strptime('2022-01-17', '%Y-%m-%d').timestamp() * 1000), FrequencyType.WEEKLY), # +3%
@@ -30,27 +25,18 @@ class WeeklyPriceChangeReportTest(TestCase):
             CandleStick(100.00, 120.00, 80.00, 93.00, 100, int(datetime.strptime('2022-03-28', '%Y-%m-%d').timestamp() * 1000), FrequencyType.WEEKLY),  # -7%
         ]
 
-    def testRetrieveData(self):
-        o = WeeklyPriceChangeReport(self._mock_api)
-        o.retrieveData('test')
-        self.assertEqual(self._mock_api.getPriceHistory.call_count, 1, "Mocked api not called expected amount of times")
-
     def testReport(self):
         percent = 4.0
-        o = WeeklyPriceChangeReport(self._mock_api)
-        o.retrieveData('test')
-        r = list(o.generate(percent))
+        o = PriceHistory(self._candlesticks)
 
-        self.assertEqual(o.totalWeeks(), len(self.fixture3MonthApiResponse()), "WeeklyPriceChangeReport did not return expected number of weeks")
-        self.assertEqual(o.thresholdExceededWeeksTotal(percent), 10, "WeeklyPriceChangeReport did not return expected number of weeks that exceeded threshold")
-        self.assertEqual(len(o.longestThresholdExceededWeeks(percent)), 4, "WeeklyPriceChangeReport did not return expected number for longest consecutive weeks that exceeded threshold")
+        self.assertEqual(o.countIntervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
+        self.assertEqual(o.countIntervalsExceedPercentThreshold(percent), 10, "PriceHistory did not return expected number of intervals that exceeded threshold")
+        self.assertEqual(o.percentProbability(percent), 76.92, "PriceHistory did not return expected percent probability")
 
     def testEmptyReport(self):
         percent = 11.0
-        o = WeeklyPriceChangeReport(self._mock_api)
-        o.retrieveData('test')
-        r = list(o.generate(percent))
+        o = PriceHistory(self._candlesticks)
 
-        self.assertEqual(o.totalWeeks(), len(self.fixture3MonthApiResponse()), "WeeklyPriceChangeReport did not return expected number of weeks")
-        self.assertEqual(o.thresholdExceededWeeksTotal(percent), 0, "WeeklyPriceChangeReport did not return expected number of weeks that exceeded threshold")
-        self.assertIsNone(o.longestThresholdExceededWeeks(percent), "WeeklyPriceChangeReport did not return expected None for longest consecutive weeks that exceeded threshold")
+        self.assertEqual(o.countIntervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
+        self.assertEqual(o.countIntervalsExceedPercentThreshold(percent), 0, "PriceHistory did not return expected number of intervals that exceeded threshold")
+        self.assertEqual(o.percentProbability(percent), 0, "PriceHistory did not return expected percent probability")
