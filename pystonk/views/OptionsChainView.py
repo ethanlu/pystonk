@@ -28,13 +28,13 @@ class OptionsChainView(View):
 
         for (strike_price, percent_change, call_option, put_option) in self._options_chain.matrix():
             flag = ''
-            if call_option == self._sell_call:
+            if call_option == self._sell_call[0]:
                 flag += 'c'
-            if call_option == self._buy_call:
+            if call_option == self._buy_call[0]:
                 flag += 'C'
-            if put_option == self._sell_put:
+            if put_option == self._sell_put[0]:
                 flag += 'p'
-            if put_option == self._buy_put:
+            if put_option == self._buy_put[0]:
                 flag += 'P'
 
             self._t.add_row((

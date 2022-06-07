@@ -146,7 +146,7 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Percent Threshold (`{self._percent}%`) Exceed Rate : `{self._price_history_estimate.percentProbability(self._percent)}%`"
+                    "text": f"Percent Threshold (`{self._percent}%`) Exceed Rate : `{self._price_history.percentProbability(self._percent)}%`"
                 }
             }
         ]
