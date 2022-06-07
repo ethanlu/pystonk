@@ -1,92 +1,52 @@
 from pystonk.models.PriceChangeEstimate import PriceChangeEstimate
-from pystonk.view import View
+from pystonk.reports.WeeklyPriceChangeReport import WeeklyPriceChangeReport
+from pystonk.views import View
 
 from quickchart import QuickChart
 from prettytable import PrettyTable
-from typing import Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional
 
 import random
 
 
 class PriceHistoryView(View):
-    def __init__(self, symbol: str, percent: float, data: Iterable, total_weeks: int, exceeded_weeks: int, longest_weeks: Optional[List], price_change_estimate: PriceChangeEstimate):
+    def __init__(self, symbol: str, percent: float, report: WeeklyPriceChangeReport):
         super().__init__()
+
         self._symbol = symbol
         self._percent = percent
-        self._data = data
-        self._total_weeks = total_weeks
-        self._exceeded_weeks = exceeded_weeks
-        self._longest_weeks = longest_weeks,
-        self._price_change_estimate = price_change_estimate
+        self._report = report
 
-    def show(self) -> List:
-        t = PrettyTable()
-        t.field_names = (' ', 'Week', 'Open', 'Close', '% Change')
+        self._data = self._report.generate(self._percent)
+        self._total_weeks = self._report.totalWeeks()
+        self._exceeded_weeks = self._report.thresholdExceededWeeksTotal(self._percent)
+        self._longest_weeks = self._report.longestThresholdExceededWeeks(self._percent)
+        self._price_change_estimate = self._report.priceChangeEstimate()
+
+        # history table
+        self._t = PrettyTable()
+        self._t.field_names = (' ', 'Week', 'Open', 'Close', '% Change')
 
         for (group, candlestick) in self._data:
             flag = ''
             if group > 0:
                 flag = '*'
 
-            t.add_row((
+            self._t.add_row((
                 flag,
                 candlestick.startDateTime.strftime('%Y-%m-%d'),
                 '%7.2f' % candlestick.openPrice,
                 '%7.2f' % candlestick.closePrice,
                 candlestick.percentChange
             ))
-        t.align = 'r'
+        self._t.align = 'r'
 
-        response = [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is the price history details for `{self._symbol}` with intervals where the price change exceeded `{self._percent}%` marked with `*`"
-                },
-            },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"```{t.get_string()}```"
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Found `{self._total_weeks}` week intervals for this price history"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Found `{self._exceeded_weeks}` week intervals where the price change exceeded `{self._percent}%`"
-                }
-            }
-        ]
-
-        if self._longest_weeks:
-            response.append(
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"First longest consecutive week of price change exceeding `{self._percent}%` started on `{self._longest_weeks[0][1].startDateTime.strftime('%Y-%m-%d')}` and ended on `{self._longest_weeks[-1][1].startDateTime.strftime('%Y-%m-%d')}` (`{len(self._longest_weeks)}` week intervals)"
-                    }
-                }
-            )
-
-        hc = QuickChart()
-        hc.width = self.CHART_WIDTH
-        hc.height = self.CHART_HEIGHT
-        hc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
-        hc.config = {
+        # histogram
+        self._hc = QuickChart()
+        self._hc.width = self.CHART_WIDTH
+        self._hc.height = self.CHART_HEIGHT
+        self._hc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
+        self._hc.config = {
             "type": "bar",
             "data": {
                 "labels": self._price_change_estimate.histogramBins(),
@@ -118,11 +78,12 @@ class PriceHistoryView(View):
             }
         }
 
-        pdc = QuickChart()
-        pdc.width = self.CHART_WIDTH
-        pdc.height = self.CHART_HEIGHT
-        pdc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
-        pdc.config = {
+        # probability density
+        self._pdc = QuickChart()
+        self._pdc.width = self.CHART_WIDTH
+        self._pdc.height = self.CHART_HEIGHT
+        self._pdc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
+        self._pdc.config = {
             "type": "scatter",
             "data": {
                 "datasets": [
@@ -150,6 +111,55 @@ class PriceHistoryView(View):
             }
         }
 
+    def show_text(self) -> str:
+        return f"price history for {self._symbol} with {self._percent} threshold cannot be shown in text-only mode"
+
+    def show(self) -> List[Dict]:
+        response = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is the price history details for `{self._symbol}` with intervals where the price change exceeded `{self._percent}%` marked with `*`"
+                },
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"```{self._t.get_string()}```"
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Found `{self._total_weeks}` week intervals for this price history"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Found `{self._exceeded_weeks}` week intervals where the price change exceeded `{self._percent}%`"
+                }
+            }
+        ]
+
+        if self._longest_weeks:
+            response.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"First longest consecutive week of price change exceeding `{self._percent}%` started on `{self._longest_weeks[0][1].startDateTime.strftime('%Y-%m-%d')}` and ended on `{self._longest_weeks[-1][1].startDateTime.strftime('%Y-%m-%d')}` (`{len(self._longest_weeks)}` week intervals)"
+                    }
+                }
+            )
+
         response += [
             {
                 "type": "image",
@@ -157,7 +167,7 @@ class PriceHistoryView(View):
                     "type": "plain_text",
                     "text": "Weekly Price Change Histogram"
                 },
-                "image_url": hc.get_short_url(),
+                "image_url": self._hc.get_short_url(),
                 "alt_text": "Weekly Price Change Histogram"
             },
             {
@@ -180,7 +190,7 @@ class PriceHistoryView(View):
                     "type": "plain_text",
                     "text": "Weekly Price Change Distribution"
                 },
-                "image_url": pdc.get_short_url(),
+                "image_url": self._pdc.get_short_url(),
                 "alt_text": "Weekly Price Change Distribution"
             },
             {

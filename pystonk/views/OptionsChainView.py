@@ -1,24 +1,28 @@
-from pystonk.view import View
+from pystonk.reports.WeeklyOptionsReport import WeeklyOptionsReport
+from pystonk.views import View
 
 from prettytable import PrettyTable
-from typing import Iterable, List, NamedTuple, Optional
+from typing import Dict, Iterable, List, NamedTuple, Optional
 
 import random
 
 
 class OptionsChainView(View):
-    def __init__(self, symbol: str, premium: float, current_price: float, data: Iterable, sell_options: Optional[NamedTuple], buy_options: Optional[NamedTuple]):
+    def __init__(self, symbol: str, premium: float, report: WeeklyOptionsReport):
         super().__init__()
+
         self._symbol = symbol
         self._premium = premium
-        self._current_price = current_price,
-        self._data = data
-        self._sell_options = sell_options
-        self._buy_options = buy_options
+        self._report = report
 
-    def show(self) -> List:
-        t = PrettyTable()
-        t.field_names = ('  ', 'Call Bid', 'Call Ask', 'Put Bid', 'Put Ask', 'Strike', '% Change')
+        self._current_price = self._report.getMark(),
+        self._data = self._report.generate()
+        self._sell_options = self._report.getStrikePricesForTargetPremium(self._premium)
+        self._buy_options = self._report.getStrikePricesForTargetPremium(premium, is_sell=False)
+
+        # options table
+        self._t = PrettyTable()
+        self._t.field_names = ('  ', 'Call Bid', 'Call Ask', 'Put Bid', 'Put Ask', 'Strike', '% Change')
 
         sell_call = sell_put = buy_call = buy_put = None
         if self._sell_options:
@@ -39,7 +43,7 @@ class OptionsChainView(View):
             if put_option == buy_put:
                 flag += 'P'
 
-            t.add_row((
+            self._t.add_row((
                 flag,
                 '%7.2f' % call_option.bid,
                 '%7.2f' % call_option.ask,
@@ -48,8 +52,12 @@ class OptionsChainView(View):
                 '%7.2f' % float(strike_price),
                 '%7.2f' % percent_change,
             ))
-        t.align = 'r'
+        self._t.align = 'r'
 
+    def show_text(self) -> str:
+        return f"option chain for {self._symbol} with {self._premium} premium cannot be shown in text-only mode"
+
+    def show(self) -> List[Dict]:
         response = [
             {
                 "type": "section",
@@ -63,14 +71,15 @@ class OptionsChainView(View):
             },
         ]
 
+        # paginate table view into sections
         i = 0
-        while i < len(t.rows):
+        while i < len(self._t.rows):
             response.append(
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"```{t.get_string(start=i, end=i + self.SLACK_BLOCK_LIMIT)}```"
+                        "text": f"```{self._t.get_string(start=i, end=i + self.SLACK_BLOCK_LIMIT)}```"
                     }
                 }
             )

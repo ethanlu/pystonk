@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Dict
 
 
 class View(ABC):
@@ -14,5 +14,17 @@ class View(ABC):
         pass
 
     @abstractmethod
-    def show(self) -> List:
+    def show_text(self) -> str:
+        """
+        show results as text only when slack cannot show results as block kit elements
+        :return: results as a string
+        """
+        pass
+
+    @abstractmethod
+    def show(self) -> List[Dict]:
+        """
+        show results as slack block kit (https://api.slack.com/reference/block-kit/blocks)
+        :return: results as a list of dictionaries representing slack block kit elements
+        """
         pass

@@ -1,6 +1,6 @@
-from pystonk.view import View
+from pystonk.views import View
 
-from typing import List
+from typing import Dict, List
 
 import random
 
@@ -8,15 +8,19 @@ import random
 class ErrorView(View):
     def __init__(self, e: str):
         super().__init__()
+
         self._error_message = e
 
-    def show(self) -> List:
+    def show_text(self) -> str:
+        return self._error_message
+
+    def show(self) -> List[Dict]:
         return [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{random.choice(self.SLACK_FAIL_EMOJI)} \n Unexpected error : {self._error_message}"
+                    "text": f"{random.choice(self.SLACK_FAIL_EMOJI)} \n {self._error_message}"
                 }
             }
         ]

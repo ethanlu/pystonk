@@ -18,6 +18,7 @@ def load_requirements():
         #  used for all other situations
         return [
             "boto3",
+            "dependency-injector",
             "numpy",
             "prettytable",
             "pyhocon",

@@ -1,7 +1,6 @@
-from pystonk import get_conf_path
+from pystonk.di import Container
 from pystonk.utils.LoggerMixin import getLogger
 
-from pyhocon import ConfigFactory
 from slack_bolt import App
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from typing import Callable, Dict
@@ -10,22 +9,21 @@ import boto3
 import json
 import re
 
-config = ConfigFactory.parse_file(get_conf_path())
 logger = getLogger('pystonk')
 app = App(
-    token=config['slack']['token'],
-    signing_secret=config['slack']['secret'],
+    token=Container.configuration()['slack']['token'],
+    signing_secret=Container.configuration()['slack']['secret'],
     logger=logger,
-    process_before_response=config['slack']['lambda']
+    process_before_response=Container.configuration()['slack']['lambda']
 )
-lambda_client = boto3.client('lambda', region_name=config['aws']['region'])
+lambda_client = boto3.client('lambda', region_name=Container.configuration()['aws']['region'])
 
 
 def dispatch_response(ack: Callable, payload: Dict) -> None:
-    logger.debug(f"aws lambda arn is `{config['aws']['lambda_arn']}`")
+    logger.debug(f"aws lambda arn is `{Container.configuration()['aws']['lambda_arn']}`")
     # call the second lambda to do the processing
     lambda_client.invoke(
-        FunctionName=config['aws']['lambda_arn'],
+        FunctionName=Container.configuration()['aws']['lambda_arn'],
         InvocationType='Event',
         Payload=json.dumps(payload)
     )
