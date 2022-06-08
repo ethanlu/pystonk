@@ -59,7 +59,7 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Intervals where the price change exceeded `{self._percent}%` are marked with `*`" if self.verbose else f"Last {self.TRUNCATED_HISTORY_LIMIT} intervals where the price change exceeded {self._percent}"
+                    "text": f"Intervals where the price change exceeded `{self._percent}%` are marked with `*`" if self.verbose else f"Last {self.TRUNCATED_HISTORY_LIMIT} intervals where the price change exceeded `{self._percent}%`"
                 },
             }
         ]
