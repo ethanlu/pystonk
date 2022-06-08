@@ -49,7 +49,10 @@ class Command(LoggerMixin):
             args = self.parser.parse_args(s.split(' ')[1:])
             self.logger.debug(f"parsed arguments : {args}")
 
-            return self.process(args)
+            view = self.process(args)
+            view.verbose = args.verbose
+
+            return view
         except ArgumentError:
             return HelpView([self.help()])
         except:
