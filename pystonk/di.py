@@ -16,7 +16,6 @@ class Container(containers.DeclarativeContainer):
         get_conf_path()
     )
 
-    # apis
     options_chain_api = providers.Singleton(
         OptionsChainApi,
         api_key=configuration()['api_key']
@@ -45,24 +44,8 @@ class Container(containers.DeclarativeContainer):
             )(),
             providers.Singleton(
                 PriceHistoryCommand,
+                quote_api(),
                 price_history_api()
             )()
         ]
-    )
-
-    # commands
-    options_chain_command = providers.Singleton(
-        OptionsChainCommand,
-        quote_api(),
-        options_chain_api()
-    )
-
-    price_check_command = providers.Singleton(
-        PriceCheckCommand,
-        quote_api()
-    )
-
-    price_history_command = providers.Singleton(
-        PriceHistoryCommand,
-        price_history_api()
     )

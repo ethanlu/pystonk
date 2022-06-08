@@ -38,7 +38,7 @@ class PriceHistoryEstimateTest(TestCase):
         h = o.histogram()
         self.assertEqual(len(h), len(bins), "PriceHistoryEstimate did not calculate expected number of histogram data")
 
-        self.assertEqual(o.percentProbability(15), .69, "PriceHistoryEstimate did not calculate percent probability correctly for weighted and unweighted")
+        self.assertEqual(o.percent_probability(15), .69, "PriceHistoryEstimate did not calculate percent probability correctly for weighted and unweighted")
 
         x, y = o.pdf()
         self.assertEqual(len(x), len(y), "PriceHistoryEstimate did not calculate pdf with expected values")

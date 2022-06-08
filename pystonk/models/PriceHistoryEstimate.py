@@ -9,7 +9,7 @@ import numpy as np
 class PriceHistoryEstimate(object):
     def __init__(self, data: List[CandleStick]):
         self._raw_data = data
-        self._data = [c.percentChange for c in self._raw_data]
+        self._data = [c.percent_change for c in self._raw_data]
         self._mean = np.mean(self._data)
         self._std = np.std(self._data)
 
@@ -36,5 +36,5 @@ class PriceHistoryEstimate(object):
     def pdf(self) -> Tuple:
         return self._data, [round(v, 4) for v in self._pdf]
 
-    def percentProbability(self, percent: float) -> float:
+    def percent_probability(self, percent: float) -> float:
         return round((1 - self._cdf(percent)) * 100, 2)

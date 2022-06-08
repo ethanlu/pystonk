@@ -48,7 +48,7 @@ class OptionContract(object):
         self._last_trading_datetime = datetime.fromtimestamp(last_trading_datetime / 1000)
 
     @property
-    def contractType(self) -> ContractType:
+    def contract_type(self) -> ContractType:
         return self._contract_type
 
     @property
@@ -60,7 +60,7 @@ class OptionContract(object):
         return self._description
 
     @property
-    def strikePrice(self) -> float:
+    def strike_price(self) -> float:
         return self._strike_price
 
     @property
@@ -72,11 +72,11 @@ class OptionContract(object):
         return self._ask
 
     @property
-    def bidSize(self) -> int:
+    def bid_size(self) -> int:
         return self._bid_ask_size[0]
 
     @property
-    def askSize(self) -> int:
+    def ask_size(self) -> int:
         return self._bid_ask_size[1]
 
     @property
@@ -104,21 +104,21 @@ class OptionContract(object):
         return self._rho
 
     @property
-    def openInterest(self) -> int:
+    def open_interest(self) -> int:
         return self._open_interest
 
     @property
-    def isITM(self) -> bool:
+    def is_itm(self) -> bool:
         return self._in_the_money
 
     @property
-    def isNonstandard(self) -> bool:
+    def is_nonstandard(self) -> bool:
         return self._non_standard
 
     @property
-    def expirationDateTime(self) -> datetime:
+    def expiration_datetime(self) -> datetime:
         return self._expiration_datetime
 
     @property
-    def lastTradingDateTime(self) -> datetime:
+    def last_trading_datetime(self) -> datetime:
         return self._last_trading_datetime

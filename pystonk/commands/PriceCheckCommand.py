@@ -2,6 +2,8 @@ from pystonk.api.QuoteApi import QuoteApi
 from pystonk.commands import Command
 from pystonk.utils.CustomArgParser import CustomArgParser
 from pystonk.views import View
+from pystonk.views.ErrorView import ErrorView
+
 from pystonk.views.PriceCheckView import PriceCheckView
 
 from argparse import Namespace
@@ -39,4 +41,10 @@ class PriceCheckCommand(Command):
 
     def process(self, args: Namespace) -> Type[View]:
         symbol = args.symbol.upper()
-        return PriceCheckView(symbol, self._quote_api.getQuote(symbol))
+
+        quote = self._quote_api.get_quote(symbol)
+
+        if quote:
+            return PriceCheckView(symbol=symbol, quote=quote)
+        else:
+            return ErrorView(f"{symbol} is not found...")

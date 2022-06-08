@@ -1,4 +1,4 @@
-from pystonk.utils import get_next_monday_friday, is_number, is_stock, percent_diff
+from pystonk.utils import get_next_monday_friday, is_number, is_stock, percent_diff, coalesce
 
 from datetime import date
 from unittest import TestCase
@@ -151,3 +151,14 @@ class UtilsTest(TestCase):
         self.assertFalse(is_stock('abcd\s'))
         self.assertFalse(is_stock('abcd-s'))
         self.assertFalse(is_stock('abcd!s'))
+
+    def testCoalesce(self):
+        data = {'a': 1, 'b': 2, 'c': 3}
+        self.assertEqual(coalesce(data, ('a', )), 1)
+        self.assertEqual(coalesce(data, ('d', 'b', 'a', 'c')), 2)
+        self.assertEqual(coalesce(data, ('e', 'f', 'c')), 3)
+
+    def testCoalesceDefault(self):
+        data = {'a': 1}
+        self.assertIsNone(coalesce(data, ('b', )))
+        self.assertEqual(coalesce(data, ('b', ), 5), 5)

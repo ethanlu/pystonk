@@ -13,7 +13,7 @@ class OptionsChain(LoggerMixin):
     def matrix(self) -> List[Tuple[str, float, OptionContract, OptionContract]]:
         return self._matrix
 
-    def closestCallOption(self, premium: float, is_sell: bool = True) -> Optional[Tuple]:
+    def closest_call_option(self, premium: float, is_sell: bool = True) -> Optional[Tuple]:
         closest = None
         for strike_price, percent_change, call_option, _ in self._matrix:
             call_price = call_option.bid if is_sell else call_option.ask
@@ -23,7 +23,7 @@ class OptionsChain(LoggerMixin):
 
         return closest
 
-    def closestPutOption(self, premium: float, is_sell: bool = True) -> Optional[Tuple]:
+    def closest_put_option(self, premium: float, is_sell: bool = True) -> Optional[Tuple]:
         closest = None
         for strike_price, percent_change, _, put_option in reversed(self._matrix):
             put_price = put_option.bid if is_sell else put_option.ask

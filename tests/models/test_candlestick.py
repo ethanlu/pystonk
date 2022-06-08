@@ -21,14 +21,14 @@ class CandleStickTest(TestCase):
         o = CandleStick(**self._weekly_candlestick_data)
 
         self.assertIsInstance(o, CandleStick)
-        self.assertEqual(o.openPrice, 5.00, "CandleStick did not normalize open price")
-        self.assertEqual(o.highPrice, 10.00, "CandleStick did not normalize high price")
-        self.assertEqual(o.lowPrice, 1.00, "CandleStick did not normalize low price")
-        self.assertEqual(o.closePrice, 7.50, "CandleStick did not normalize close price")
+        self.assertEqual(o.open_price, 5.00, "CandleStick did not normalize open price")
+        self.assertEqual(o.high_price, 10.00, "CandleStick did not normalize high price")
+        self.assertEqual(o.low_price, 1.00, "CandleStick did not normalize low price")
+        self.assertEqual(o.close_price, 7.50, "CandleStick did not normalize close price")
         self.assertEqual(o.volume, 100, "CandleStick did not normalize volume")
         self.assertEqual(
-            o.startDateTime.timestamp(), datetime.strptime('2020-01-01','%Y-%m-%d').timestamp(),
+            o.start_datetime.timestamp(), datetime.strptime('2020-01-01','%Y-%m-%d').timestamp(),
             "CandleStick did not normalize start datetime"
         )
-        self.assertEqual(o.frequencyType, FrequencyType.WEEKLY, "CandleStick did not normalize frequency type")
-        self.assertEqual(o.percentChange, 50.00, "CandleStick did not calculate percent change correctly")
+        self.assertEqual(o.frequency_type, FrequencyType.WEEKLY, "CandleStick did not normalize frequency type")
+        self.assertEqual(o.percent_change, 50.00, "CandleStick did not calculate percent change correctly")

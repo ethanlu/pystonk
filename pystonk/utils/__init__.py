@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from typing import Any, Tuple
+from typing import Any, Dict, Tuple
 
 import re
 
@@ -24,3 +24,14 @@ def is_number(n: Any) -> bool:
 
 def is_stock(n: Any) -> bool:
     return re.match(r"^[a-zA-Z.]+$", n) is not None
+
+
+def coalesce(data: Dict, key: Tuple, default: Any = None) -> Any:
+    """
+    returns data[k] for first k in key that exists in data
+    :param data: key-value paris
+    :param key: list of keys
+    :param default: value returned if no keys are found in data
+    :return:
+    """
+    return next((data[k] for k in key if k in data), default)

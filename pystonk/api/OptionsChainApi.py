@@ -15,7 +15,7 @@ class OptionsChainApi(Api):
     def __init__(self, api_key: str):
         super().__init__(api_key)
 
-    def _buildContractsList(self, friday_date: date, contracts: Dict) -> Dict[str, OptionContract]:
+    def _build_contracts_list(self, friday_date: date, contracts: Dict) -> Dict[str, OptionContract]:
         try:
             date_key = friday_date.strftime('%Y-%m-%d:')
             contract_date_key = next((k for k in contracts.keys() if k.startswith(date_key)))
@@ -46,7 +46,7 @@ class OptionsChainApi(Api):
         except StopIteration:
             return {}
 
-    def getWeeklySingleOptionChain(self, symbol: str, week_date: date, strike_count: int = 100) -> Dict[str, Tuple[OptionContract, OptionContract]]:
+    def get_weekly_single_option_chain(self, symbol: str, week_date: date, strike_count: int = 100) -> Dict[str, Tuple[OptionContract, OptionContract]]:
         symbol = symbol.upper()
         next_monday, next_friday = get_next_monday_friday(week_date)
         params = {
@@ -68,8 +68,8 @@ class OptionsChainApi(Api):
         self.logger.debug(f"response : {response.status_code}")
         response_data = response.json()
 
-        puts = self._buildContractsList(next_friday, response_data['putExpDateMap'])
-        calls = self._buildContractsList(next_friday, response_data['callExpDateMap'])
+        puts = self._build_contracts_list(next_friday, response_data['putExpDateMap'])
+        calls = self._build_contracts_list(next_friday, response_data['callExpDateMap'])
 
         return {k: (calls[k], puts[k])
             for k in calls.keys()

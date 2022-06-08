@@ -23,19 +23,19 @@ class CandleStick(object):
         self._percent_change = percent_diff(self._open_price, self._close_price)
 
     @property
-    def openPrice(self) -> float:
+    def open_price(self) -> float:
         return self._open_price
 
     @property
-    def highPrice(self) -> float:
+    def high_price(self) -> float:
         return self._high_price
 
     @property
-    def lowPrice(self) -> float:
+    def low_price(self) -> float:
         return self._low_price
 
     @property
-    def closePrice(self) -> float:
+    def close_price(self) -> float:
         return self._close_price
 
     @property
@@ -43,13 +43,13 @@ class CandleStick(object):
         return self._volume
 
     @property
-    def startDateTime(self) -> datetime:
+    def start_datetime(self) -> datetime:
         return self._start_datetime
 
     @property
-    def frequencyType(self) -> FrequencyType:
+    def frequency_type(self) -> FrequencyType:
         return self._frequency_type
 
     @property
-    def percentChange(self) -> float:
+    def percent_change(self) -> float:
         return self._percent_change

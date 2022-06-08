@@ -16,11 +16,11 @@ class OptionsChainView(View):
         self._latest_price = latest_price
         self._options_chain = options_chain
 
-        self._sell_call = self._options_chain.closestCallOption(self._premium)
-        self._buy_call = self._options_chain.closestCallOption(self._premium, is_sell=False)
+        self._sell_call = self._options_chain.closest_call_option(self._premium)
+        self._buy_call = self._options_chain.closest_call_option(self._premium, is_sell=False)
 
-        self._sell_put = self._options_chain.closestPutOption(self._premium)
-        self._buy_put = self._options_chain.closestPutOption(self._premium, is_sell=False)
+        self._sell_put = self._options_chain.closest_put_option(self._premium)
+        self._buy_put = self._options_chain.closest_put_option(self._premium, is_sell=False)
 
         # options table
         self._t = PrettyTable()
@@ -92,7 +92,7 @@ class OptionsChainView(View):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"`c` : Closest `{self._sell_call[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-call is `{self._sell_call[0].strikePrice}`\nWhich is `{self._sell_call[1]}` from current price of `{self._latest_price}` (`{self._sell_call[2]}%`)"
+                            "text": f"`c` : Closest `{self._sell_call[0].expiration_datetime.strftime('%Y-%m-%d')}` strike price for sell-call is `{self._sell_call[0].strike_price}`\nWhich is `{self._sell_call[1]}` from current price of `{self._latest_price}` (`{self._sell_call[2]}%`)"
                         }
                     }
                 )
@@ -103,7 +103,7 @@ class OptionsChainView(View):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"`p` : Closest `{self._sell_put[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for sell-put is `{self._sell_put[0].strikePrice}`\nWhich is `{self._sell_put[1]}` from current price of `{self._latest_price}` (`{self._sell_put[2]}%`)"
+                            "text": f"`p` : Closest `{self._sell_put[0].expiration_datetime.strftime('%Y-%m-%d')}` strike price for sell-put is `{self._sell_put[0].strike_price}`\nWhich is `{self._sell_put[1]}` from current price of `{self._latest_price}` (`{self._sell_put[2]}%`)"
                         }
                     }
                 )
@@ -131,7 +131,7 @@ class OptionsChainView(View):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"`C` : Closest `{self._buy_call[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-call is `{self._buy_call[0].strikePrice}`\nWhich is `{self._buy_call[1]}` from current price of `{self._latest_price}` (`{self._buy_call[2]}%`)"
+                            "text": f"`C` : Closest `{self._buy_call[0].expiration_datetime.strftime('%Y-%m-%d')}` strike price for buy-call is `{self._buy_call[0].strike_price}`\nWhich is `{self._buy_call[1]}` from current price of `{self._latest_price}` (`{self._buy_call[2]}%`)"
                         }
                     }
                 )
@@ -142,7 +142,7 @@ class OptionsChainView(View):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"`P` : Closest `{self._buy_put[0].expirationDateTime.strftime('%Y-%m-%d')}` strike price for buy-put is `{self._buy_put[0].strikePrice}`\nWhich is `{self._buy_put[1]}` from current price of `{self._latest_price}` (`{self._buy_put[2]}%`)"
+                            "text": f"`P` : Closest `{self._buy_put[0].expiration_datetime.strftime('%Y-%m-%d')}` strike price for buy-put is `{self._buy_put[0].strike_price}`\nWhich is `{self._buy_put[1]}` from current price of `{self._latest_price}` (`{self._buy_put[2]}%`)"
                         }
                     }
                 )

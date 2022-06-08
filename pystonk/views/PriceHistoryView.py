@@ -24,15 +24,15 @@ class PriceHistoryView(View):
 
         for candlestick in self._price_history.intervals():
             flag = ''
-            if candlestick.percentChange >= percent:
+            if candlestick.percent_change >= percent:
                 flag = '*'
 
             self._t.add_row((
                 flag,
-                candlestick.startDateTime.strftime('%Y-%m-%d'),
-                '%7.2f' % candlestick.openPrice,
-                '%7.2f' % candlestick.closePrice,
-                candlestick.percentChange
+                candlestick.start_datetime.strftime('%Y-%m-%d'),
+                '%7.2f' % candlestick.open_price,
+                '%7.2f' % candlestick.close_price,
+                candlestick.percent_change
             ))
         self._t.align = 'r'
 
@@ -132,21 +132,21 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Found `{self._price_history.countIntervals()}` week intervals for this price history"
+                    "text": f"Found `{self._price_history.count_intervals()}` week intervals for this price history"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Found `{self._price_history.countIntervalsExceedPercentThreshold(self._percent)}` week intervals where the price change exceeded `{self._percent}%`"
+                    "text": f"Found `{self._price_history.count_intervals_exceed_percent_threshold(self._percent)}` week intervals where the price change exceeded `{self._percent}%`"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Percent Threshold (`{self._percent}%`) Exceed Rate : `{self._price_history.percentProbability(self._percent)}%`"
+                    "text": f"Percent Threshold (`{self._percent}%`) Exceed Rate : `{self._price_history.percent_rate(self._percent)}%`"
                 }
             }
         ]
@@ -188,7 +188,7 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Percent Threshold (`{self._percent}%`) Exceed Probability : `{self._price_history_estimate.percentProbability(self._percent)}%`"
+                    "text": f"Percent Threshold (`{self._percent}%`) Exceed Probability : `{self._price_history_estimate.percent_probability(self._percent)}%`"
                 }
             }
         ]

@@ -4,6 +4,7 @@ from pystonk.commands import Command
 from pystonk.models.OptionsChain import OptionsChain
 from pystonk.utils.CustomArgParser import CustomArgParser
 from pystonk.views import View
+from pystonk.views.ErrorView import ErrorView
 from pystonk.views.OptionsChainView import OptionsChainView
 
 from argparse import Namespace
@@ -50,18 +51,21 @@ class OptionsChainCommand(Command):
         symbol = args.symbol.upper()
         premium = abs(round(args.premium, 2))
 
-        latest_price = self._quote_api.getQuote(symbol)
+        quote = self._quote_api.get_quote(symbol)
 
-        return OptionsChainView(
-            symbol=symbol,
-            premium=premium,
-            latest_price=latest_price,
-            options_chain=OptionsChain(
-                latest_price,
-                self._options_chain_api.getWeeklySingleOptionChain(
-                    symbol=symbol,
-                    week_date=date.today(),
-                    strike_count=200
+        if quote:
+            return OptionsChainView(
+                symbol=symbol,
+                premium=premium,
+                latest_price=quote.price,
+                options_chain=OptionsChain(
+                    quote.price,
+                    self._options_chain_api.get_weekly_single_option_chain(
+                        symbol=symbol,
+                        week_date=date.today(),
+                        strike_count=200
+                    )
                 )
             )
-        )
+        else:
+            return ErrorView(f"{symbol} is not found...")

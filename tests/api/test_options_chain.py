@@ -8,7 +8,7 @@ from typing import Dict, Tuple
 from unittest import TestCase
 
 
-class OptionsChainTest(TestCase):
+class OptionsChainApiTest(TestCase):
     def setUp(self) -> None:
         self._mock_optionschain_response = MagicMock()
         self._mock_optionschain_response.json.return_value = {
@@ -246,7 +246,7 @@ class OptionsChainTest(TestCase):
     def testPriceHistory(self, requests_mock):
         requests_mock.get.return_value = self._mock_optionschain_response
         o = OptionsChainApi('some key')
-        r = o.getWeeklySingleOptionChain(
+        r = o.get_weekly_single_option_chain(
             symbol='test',
             week_date=date(2019, 12, 29)
         )
@@ -260,15 +260,15 @@ class OptionsChainTest(TestCase):
             self.assertIsInstance(v, Tuple, f"OptionsChainApi did not return call and put contracts as a tuple for strike price {k}")
             self.assertIsInstance(v[0], OptionContract, f"OptionsChainApi did not return OptionContract for call strike price {k}")
             self.assertIsInstance(v[1], OptionContract, f"OptionsChainApi did not return OptionContract for put strike price {k}")
-            self.assertEqual(v[0].contractType, ContractType.CALL, f"OptionsChainApi did not return call OptionContract for strike price {k}")
-            self.assertEqual(v[1].contractType, ContractType.PUT, f"OptionsChainApi did not return call OptionContract for strike price {k}")
-            self.assertListEqual([v[0].strikePrice, v[1].strikePrice], [float(k), float(k)], f"OptionsChainApi did not return correct OptionContract strike price pairs for strike price {k}")
+            self.assertEqual(v[0].contract_type, ContractType.CALL, f"OptionsChainApi did not return call OptionContract for strike price {k}")
+            self.assertEqual(v[1].contract_type, ContractType.PUT, f"OptionsChainApi did not return call OptionContract for strike price {k}")
+            self.assertListEqual([v[0].strike_price, v[1].strike_price], [float(k), float(k)], f"OptionsChainApi did not return correct OptionContract strike price pairs for strike price {k}")
 
     @patch('pystonk.api.OptionsChainApi.requests')
     def testPriceHistoryInvalid(self, requests_mock):
         requests_mock.get.return_value = self._mock_optionschain_response
         o = OptionsChainApi('some key')
-        r = o.getWeeklySingleOptionChain(
+        r = o.get_weekly_single_option_chain(
             symbol='test',
             week_date=date(2020, 1, 1)
         )

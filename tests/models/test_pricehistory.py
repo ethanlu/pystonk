@@ -29,14 +29,14 @@ class PriceHistoryTest(TestCase):
         percent = 4.0
         o = PriceHistory(self._candlesticks)
 
-        self.assertEqual(o.countIntervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
-        self.assertEqual(o.countIntervalsExceedPercentThreshold(percent), 10, "PriceHistory did not return expected number of intervals that exceeded threshold")
-        self.assertEqual(o.percentProbability(percent), 76.92, "PriceHistory did not return expected percent probability")
+        self.assertEqual(o.count_intervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
+        self.assertEqual(o.count_intervals_exceed_percent_threshold(percent), 10, "PriceHistory did not return expected number of intervals that exceeded threshold")
+        self.assertEqual(o.percent_rate(percent), 76.92, "PriceHistory did not return expected percent probability")
 
     def testEmptyReport(self):
         percent = 11.0
         o = PriceHistory(self._candlesticks)
 
-        self.assertEqual(o.countIntervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
-        self.assertEqual(o.countIntervalsExceedPercentThreshold(percent), 0, "PriceHistory did not return expected number of intervals that exceeded threshold")
-        self.assertEqual(o.percentProbability(percent), 0, "PriceHistory did not return expected percent probability")
+        self.assertEqual(o.count_intervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
+        self.assertEqual(o.count_intervals_exceed_percent_threshold(percent), 0, "PriceHistory did not return expected number of intervals that exceeded threshold")
+        self.assertEqual(o.percent_rate(percent), 0, "PriceHistory did not return expected percent probability")

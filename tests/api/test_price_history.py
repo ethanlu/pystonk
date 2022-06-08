@@ -8,7 +8,7 @@ from typing import List
 from unittest import TestCase
 
 
-class PriceHistoryTest(TestCase):
+class PriceHistoryApiTest(TestCase):
     def setUp(self) -> None:
         self._mock_pricehistory_response = MagicMock()
         self._mock_pricehistory_response.json.return_value = {
@@ -54,7 +54,7 @@ class PriceHistoryTest(TestCase):
     def testPriceHistory(self, requests_mock):
         requests_mock.get.return_value = self._mock_pricehistory_response
         o = PriceHistoryApi('some key')
-        r = o.getPriceHistory(
+        r = o.get_price_history(
             symbol='test',
             period_type=PeriodType.MONTH,
             period=1,
@@ -72,7 +72,7 @@ class PriceHistoryTest(TestCase):
     def testPriceHistoryWithDateRange(self, requests_mock):
         requests_mock.get.return_value = self._mock_pricehistory_response
         o = PriceHistoryApi('some key')
-        r = o.getPriceHistoryWithDateRange(
+        r = o.get_price_history_with_date_range(
             symbol='test',
             start=datetime.strptime('2020-01-01', '%Y-%m-%d'),
             end=datetime.strptime('2020-02-01', '%Y-%m-%d'),
