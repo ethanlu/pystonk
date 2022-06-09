@@ -32,6 +32,15 @@ class PriceHistoryCommandTest(TestCase):
 
         self.assertIsInstance(o.execute('ph abc 10'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
         self.assertIsInstance(o.execute('ph def 10.0'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 1 -v'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 1 --verbose'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 2 -f weekly'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 2 -f monthly'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 2 -f daily'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 3 -p 1'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 3 -p 2'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 3 -p 3'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 3 -p 5'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
 
     @patch('pystonk.commands.PriceHistoryCommand.PriceHistoryEstimate')
     def testPriceHistoryCommandHelpResponse(self, price_history_estimate_mock):

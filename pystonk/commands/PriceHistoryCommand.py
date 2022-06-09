@@ -16,6 +16,11 @@ import re
 
 
 class PriceHistoryCommand(Command):
+    VALID_FREQUENCY_TYPES = (FrequencyType.DAILY.value, FrequencyType.WEEKLY.value, FrequencyType.MONTHLY.value)
+    DEFAULT_FREQUENCY_TYPE = FrequencyType.WEEKLY.value
+    VALID_PERIODS = (1, 2, 3, 5)
+    DEFAULT_PERIOD = 1
+
     def __init__(self, quote_api: QuoteApi, price_history_api: PriceHistoryApi):
         super().__init__()
 
@@ -36,6 +41,25 @@ class PriceHistoryCommand(Command):
             type=float,
             help='percent threshold to exceed (absolute value)'
         )
+        self._parser.add_argument(
+            '-f', '--frequency',
+            type=str,
+            choices=self.VALID_FREQUENCY_TYPES,
+            default=self.DEFAULT_FREQUENCY_TYPE,
+            help=f"interval to use for displaying price changes " +
+                 f"\n\t\t\t\tchoose: `{'`, `'.join(self.VALID_FREQUENCY_TYPES)}`" +
+                 f"\n\t\t\t\tdefault: `{self.DEFAULT_FREQUENCY_TYPE}`"
+        )
+        self._parser.add_argument(
+            '-p', '--period',
+            type=int,
+            choices=self.VALID_PERIODS,
+            default=self.DEFAULT_PERIOD,
+            help=f"time range of price changes (years or months)" +
+                 f"\n\t\t\t\tchoose: `{'`, `'.join(map(str, self.VALID_PERIODS))}`" +
+                 f"\n\t\t\t\tdefault : `{str(self.DEFAULT_PERIOD)}`" +
+                 f"\n\t\t\t\tmonths for daily frequency, years for all others"
+        )
 
         self._quote_api = quote_api
         self._price_history_api = price_history_api
@@ -51,19 +75,29 @@ class PriceHistoryCommand(Command):
     def process(self, args: Namespace) -> Type[View]:
         symbol = args.symbol.upper()
         percent = abs(round(args.percent, 2))
+        frequency_type = FrequencyType(args.frequency)
+        period = args.period
 
         if self._quote_api.get_quote(symbol):
+            period_type = PeriodType.YEAR
+            if frequency_type == FrequencyType.DAILY:
+                # switch to month period type if fequency is daily
+                period_type = PeriodType.MONTH
+                # period of 5 is only valid for weekly and monthly frequencies. for daily, period of 5 must be 6
+                period = period if period != 5 else 6
+
             candlesticks = self._price_history_api.get_price_history(
                 symbol=symbol,
-                period_type=PeriodType.YEAR,
-                period=1,
-                frequency_type=FrequencyType.WEEKLY,
+                period_type=period_type,
+                period=period,
+                frequency_type=frequency_type,
                 frequency=1
             )
 
             return PriceHistoryView(
                 symbol=symbol,
                 percent=percent,
+                frequency_type=frequency_type,
                 price_history=PriceHistory(candlesticks),
                 price_history_estimate=PriceHistoryEstimate(candlesticks)
             )

@@ -1,3 +1,4 @@
+from pystonk.api.Types import FrequencyType
 from pystonk.models.PriceHistory import PriceHistory
 from pystonk.models.PriceHistoryEstimate import PriceHistoryEstimate
 from pystonk.views import View
@@ -10,15 +11,23 @@ import random
 
 
 class PriceHistoryView(View):
+    INTERVAL_FREQUENCY_TYPE_MAP = {
+        FrequencyType.DAILY.value: "days",
+        FrequencyType.WEEKLY.value: "weeks",
+        FrequencyType.MONTHLY.value: "months"
+    }
     TRUNCATED_HISTORY_LIMIT = 10
 
-    def __init__(self, symbol: str, percent: float, price_history: PriceHistory, price_history_estimate: PriceHistoryEstimate):
+    def __init__(self, symbol: str, percent: float, frequency_type: FrequencyType, price_history: PriceHistory, price_history_estimate: PriceHistoryEstimate):
         super().__init__()
 
         self._symbol = symbol
         self._percent = percent
         self._price_history = price_history
         self._price_history_estimate = price_history_estimate
+
+        self._frequency_type = frequency_type
+        self._interval_label = self.INTERVAL_FREQUENCY_TYPE_MAP[self._frequency_type.value]
 
         # history table
         self._t = PrettyTable()
@@ -36,7 +45,7 @@ class PriceHistoryView(View):
         self._pdc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
 
     def _build_history(self) -> List[Dict]:
-        self._t.field_names = (' ', 'Week', 'Open', 'Close', '% Change')
+        self._t.field_names = (' ', self._interval_label.capitalize(), 'Open', 'Close', '% Change')
         self._t.align = 'r'
 
         rows = []
@@ -59,7 +68,7 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Intervals where the price change exceeded `{self._percent}%` are marked with `*`" if self.verbose else f"Last {self.TRUNCATED_HISTORY_LIMIT} intervals where the price change exceeded `{self._percent}%`"
+                    "text": f"{self._interval_label.capitalize()} where the price change exceeded `{self._percent}%` are marked with `*`" if self.verbose else f"Last {self.TRUNCATED_HISTORY_LIMIT} {self._interval_label} where the price change exceeded `{self._percent}%`"
                 },
             }
         ]
@@ -69,8 +78,8 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*Total Intervals*: `{self._price_history.count_intervals()}` weeks \n" +
-                            f"*Intervals Exceeding Percent Threshold*: `{self._price_history.count_intervals_exceed_percent_threshold(self._percent)}` \n" +
+                    "text": f"*Total {self._interval_label.capitalize()}*: `{self._price_history.count_intervals()}`\n" +
+                            f"*{self._interval_label.capitalize()} Exceeding Percent Threshold*: `{self._price_history.count_intervals_exceed_percent_threshold(self._percent)}` \n" +
                             f"*Percent Threshold Exceed Rate*: `{self._price_history.percent_rate(self._percent)}%`"
                 }
             }
@@ -90,7 +99,9 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*Percent Change Mean*: `{self._price_history_estimate.mean()}` \n" +
+                    "text": f"*Percent Change Min*: `{self._price_history_estimate.min()}` \n" +
+                            f"*Percent Change Max*: `{self._price_history_estimate.max()}` \n" +
+                            f"*Percent Change Mean*: `{self._price_history_estimate.mean()}` \n" +
                             f"*Percent Change STD*: `{self._price_history_estimate.std()}` \n" +
                             f"*Percent Threshold Exceed Probability*: `{self._price_history_estimate.percent_probability(self._percent)}%`"
                 }
@@ -104,7 +115,7 @@ class PriceHistoryView(View):
                     "labels": self._price_history_estimate.histogram_bins(),
                     "datasets": [
                         {
-                            "label": f"Price Change (+/-{self._price_history_estimate.histogram_bins_interval()})",
+                            "label": f"{self._frequency_type.value.capitalize()} Price Change (+/-{self._price_history_estimate.histogram_bins_interval()})",
                             "data": self._price_history_estimate.histogram()
                         }
                     ]
@@ -123,7 +134,7 @@ class PriceHistoryView(View):
                             },
                             "scaleLabel": {
                                 "display": True,
-                                "labelString": "Count"
+                                "labelString": f"Number Of {self._interval_label.capitalize()}"
                             }
                         }]
                     }
@@ -135,7 +146,7 @@ class PriceHistoryView(View):
                 "data": {
                     "datasets": [
                         {
-                            "label": "Probability Density",
+                            "label": f"{self._frequency_type.value.capitalize()} Probability Density",
                             "data": [{"x": x, "y": y} for (x, y) in zip(*self._price_history_estimate.pdf())]
                         }
                     ]
@@ -163,7 +174,7 @@ class PriceHistoryView(View):
                     "type": "image",
                     "title": {
                         "type": "plain_text",
-                        "text": "Price Change Histogram"
+                        "text": f"{self._frequency_type.value.capitalize()} Price Change Histogram"
                     },
                     "image_url": self._hc.get_short_url(),
                     "alt_text": "Price Change Histogram"
@@ -172,7 +183,7 @@ class PriceHistoryView(View):
                     "type": "image",
                     "title": {
                         "type": "plain_text",
-                        "text": "Probability Density"
+                        "text": f"{self._frequency_type.value.capitalize()} Probability Density"
                     },
                     "image_url": self._pdc.get_short_url(),
                     "alt_text": "Probability Density"
@@ -190,7 +201,7 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n\n Here is the price history for `{self._symbol}` with `{self._percent}%` percent threshold"
+                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n\n Here is the `{self._frequency_type.value}` price history for `{self._symbol}` with `{self._percent}%` percent threshold"
                 },
             },
             {

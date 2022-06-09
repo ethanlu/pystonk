@@ -7,9 +7,10 @@ import random
 
 
 class HelpView(View):
-    def __init__(self, help: List[CommandHelp]):
+    def __init__(self, help: List[CommandHelp], message: str = None):
         super().__init__()
 
+        self._message = message
         self._help = help
 
     def show_text(self) -> str:
@@ -23,8 +24,19 @@ class HelpView(View):
                     "type": "mrkdwn",
                     "text": f"{random.choice(self.SLACK_FAIL_EMOJI)} \n I didn't understand what you wanted to do..."
                 }
-            },
+            }
         ]
+
+        if self._message:
+            response += [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": self._message
+                    }
+                }
+            ]
 
         if len(self._help) == 1:
             response += [
@@ -68,9 +80,9 @@ class HelpView(View):
                     "text": {
                         "type": "mrkdwn",
                         "text": f"*{h.name}* \n{h.description} \n\n" +
-                                f"Usage: \n\t\t `{usage_text}` \n\n" +
-                                f"Required Parameters: \n\t\t" + "\n\t\t".join(required_text) + "\n\n" +
-                                f"Optional Parameters: \n\t\t" + "\n\t\t".join(optional_text) + "\n\n"
+                                f"*Usage*: \n\t\t `{usage_text}` \n\n" +
+                                f"*Required Parameters*: \n\t\t" + "\n\t\t".join(required_text) + "\n\n" +
+                                f"*Optional Parameters*: \n\t\t" + "\n\t\t".join(optional_text) + "\n\n"
                     }
                 }
             ]

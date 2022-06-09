@@ -12,6 +12,8 @@ class PriceHistoryEstimate(object):
         self._data = [c.percent_change for c in self._raw_data]
         self._mean = np.mean(self._data)
         self._std = np.std(self._data)
+        self._min = min(self._data)
+        self._max = max(self._data)
 
         self._histogram, self._bin_edges = np.histogram(self._data, bins=self._calculate_bins())
         # center the histogram bins via:
@@ -22,9 +24,7 @@ class PriceHistoryEstimate(object):
         self._cdf = norm(loc=self._mean, scale=self._std).cdf
 
     def _calculate_bins(self) -> List:
-        minv = min(self._data)
-        maxv = max(self._data)
-        diff = abs(maxv - minv)
+        diff = abs(self._max - self._min)
 
         interval = 1.0
         if 10 < diff <= 50:
@@ -32,13 +32,19 @@ class PriceHistoryEstimate(object):
         if 50 < diff:
             interval = 5.0
 
-        return list(np.arange((interval * round(minv / interval) - interval), (interval * round(maxv / interval) + interval), interval))
+        return list(np.arange((interval * round(self._min / interval) - interval), (interval * round(self._max / interval) + interval), interval))
 
     def mean(self) -> float:
         return round(float(self._mean), 2)
 
     def std(self) -> float:
         return round(float(self._std), 2)
+
+    def min(self) -> float:
+        return round(self._min, 2)
+
+    def max(self) -> float:
+        return round(self._max, 2)
 
     def histogram(self) -> List:
         return [round(d, 2) for d in self._histogram.tolist()]

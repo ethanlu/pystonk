@@ -51,10 +51,10 @@ class Command(LoggerMixin):
 
             view = self.process(args)
             view.verbose = args.verbose
-
-            return view
-        except ArgumentError:
-            return HelpView([self.help()])
+        except ArgumentError as e:
+            view = HelpView([self.help()], message=e.message)
         except:
             self.logger.exception(f"Unexpected error while processing command...")
-            return ErrorView(f"Unexpected error while processing command...some shit broke! Tell creator to check logs and fix it!")
+            view = ErrorView(f"Unexpected error while processing command...some shit broke! Tell creator to check logs and fix it!")
+
+        return view
