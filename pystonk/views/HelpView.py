@@ -33,7 +33,7 @@ class HelpView(View):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": self._message
+                        "text": f"```{self._message}```"
                     }
                 }
             ]
