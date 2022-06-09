@@ -101,10 +101,10 @@ class PriceHistoryView(View):
             self._hc.config = {
                 "type": "bar",
                 "data": {
-                    "labels": self._price_history_estimate.histogramBins(),
+                    "labels": self._price_history_estimate.histogram_bins(),
                     "datasets": [
                         {
-                            "label": "Price Change",
+                            "label": f"Price Change (+/-{self._price_history_estimate.histogram_bins_interval()})",
                             "data": self._price_history_estimate.histogram()
                         }
                     ]

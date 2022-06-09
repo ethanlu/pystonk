@@ -31,12 +31,14 @@ class PriceHistoryEstimateTest(TestCase):
         self.assertEqual(o.mean(), -.8, "PriceHistoryEstimate did not calculate expected mean")
         self.assertEqual(o.std(), 6.42, "PriceHistoryEstimate did not calculate expected STD")
 
-        bins = o.histogramBins()
+        bins = o.histogram_bins()
+        self.assertEqual(bins, [-11.25, -8.75, -6.25, -3.75, -1.25, 1.25, 3.75, 6.25, 8.75], "PriceHistoryEstimate did not calculate expected bins for histogram")
         self.assertTrue(bins[0] < 0, "PriceHistoryEstimate did not start histogram bins at negative value")
         self.assertTrue(bins[-1] > 0, "PriceHistoryEstimate did not end histogram bins at positive value")
 
         h = o.histogram()
         self.assertEqual(len(h), len(bins), "PriceHistoryEstimate did not calculate expected number of histogram data")
+        self.assertEqual(2.5, o.histogram_bins_interval(), "PriceHistoryEstimate did not calculate expected histogram bin interval")
 
         self.assertEqual(o.percent_probability(15), .69, "PriceHistoryEstimate did not calculate percent probability correctly for weighted and unweighted")
 
