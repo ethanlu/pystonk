@@ -36,9 +36,9 @@ class OptionsChainCommand(Command):
             help='stock symbol'
         )
         self._parser.add_argument(
-            'premium',
+            'target',
             type=float,
-            help='target premium price'
+            help='target premium price or strike price percent change'
         )
         self._parser.add_argument(
             '-e', '--expiration',
@@ -48,6 +48,11 @@ class OptionsChainCommand(Command):
             help=f"the next option to pick based on current week" +
                  f"\n\t\t\t\tchoose: `{'`, `'.join(self.VALID_FREQUENCY_TYPES)}`" +
                  f"\n\t\t\t\tdefault: `{self.DEFAULT_FREQUENCY_TYPE}`"
+        )
+        self._parser.add_argument(
+            '-p', '--percent',
+            action='store_true',
+            help='use strike price percent change instead of premium for selecting closest option'
         )
 
         self._options_chain_api = options_chain_api
@@ -63,7 +68,8 @@ class OptionsChainCommand(Command):
 
     def process(self, args: Namespace) -> Type[View]:
         symbol = args.symbol.upper()
-        premium = abs(round(args.premium, 2))
+        target = abs(round(args.target, 2))
+        use_percent = args.percent
         expiration = args.expiration
 
         quote = self._quote_api.get_quote(symbol)
@@ -84,9 +90,11 @@ class OptionsChainCommand(Command):
                 expire_date = get_third_friday_of_quarter(date(today.year if next_h < 12 else (today.year + 1), next_h if next_h < 12 else 1, 1))
             if expiration == 'year':
                 expire_date = get_third_friday_of_quarter(date(today.year + 1, today.month, today.day))
+
             return OptionsChainView(
                 symbol=symbol,
-                premium=premium,
+                target=target,
+                use_percent=use_percent,
                 latest_price=quote.price,
                 expiration=expiration,
                 options_chain=OptionsChain(

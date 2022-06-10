@@ -37,22 +37,22 @@ class WeeklyOptionsReportTest(TestCase):
 
         self.assertEqual(len(o.matrix()), 5, "OptionsChain did not return expected number of call/put pairs")
 
-        sell_call = o.closest_call_option(.75)
+        sell_call = o.closest_call_option_by_premium(.75)
         self.assertEqual(sell_call[0].strike_price, 105.00, "OptionsChain did not return expected closest sell-call option's strike price")
         self.assertEqual(sell_call[1], 4.75, "OptionsChain did not return expected closest sell-call option's price diff")
         self.assertEqual(sell_call[2], 4.74, "OptionsChain did not return expected closest sell-call option's percent diff")
 
-        buy_call = o.closest_call_option(.25, is_sell=False)
+        buy_call = o.closest_call_option_by_premium(.25, is_sell=False)
         self.assertEqual(buy_call[0].strike_price, 110.00, "OptionsChain did not return expected closest buy-call option's strike price")
         self.assertEqual(buy_call[1], 9.75, "OptionsChain did not return expected closest buy-call option's price diff")
         self.assertEqual(buy_call[2], 9.73, "OptionsChain did not return expected closest buy-call option's percent diff")
 
-        sell_put = o.closest_put_option(2.24)
+        sell_put = o.closest_put_option_by_premium(2.24)
         self.assertEqual(sell_put[0].strike_price, 100.00, "OptionsChain did not return expected closest sell-put option's strike price")
         self.assertEqual(sell_put[1], -0.25, "OptionsChain did not return expected closest sell-put option's price diff")
         self.assertEqual(sell_put[2], -0.25, "OptionsChain did not return expected closest sell-put option's percent diff")
 
-        buy_put = o.closest_put_option(1.0, is_sell=False)
+        buy_put = o.closest_put_option_by_premium(1.0, is_sell=False)
         self.assertEqual(buy_put[0].strike_price, 95.00, "OptionsChain did not return expected closest buy-put option's strike price")
         self.assertEqual(buy_put[1], -5.25, "OptionsChain did not return expected closest buy-put option's price diff")
         self.assertEqual(buy_put[2], -5.24, "OptionsChain did not return expected closest buy-put option's percent diff")
