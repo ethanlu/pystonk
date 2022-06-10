@@ -1,7 +1,6 @@
 from pystonk.api import Api
 from pystonk.api.Types import ContractType, OptionType, StrategyType
 from pystonk.models.OptionContract import OptionContract
-from pystonk.utils import get_next_monday_friday
 
 from datetime import date
 from typing import Dict, Tuple
@@ -46,17 +45,15 @@ class OptionsChainApi(Api):
         except StopIteration:
             return {}
 
-    def get_weekly_single_option_chain(self, symbol: str, week_date: date, strike_count: int = 100) -> Dict[str, Tuple[OptionContract, OptionContract]]:
-        symbol = symbol.upper()
-        next_monday, next_friday = get_next_monday_friday(week_date)
+    def get_single_option_chain(self, symbol: str, expire_date: date, strike_count: int = 100) -> Dict[str, Tuple[OptionContract, OptionContract]]:
         params = {
             'apikey': self._api_key,
             'symbol': symbol,
             'contractType': ContractType.ALL.value,
             'strategy': StrategyType.SINGLE.value,
             'optionType': OptionType.STANDARD.value,
-            'fromDate': next_monday.strftime('%Y-%m-%d'),
-            'toDate': next_friday.strftime('%Y-%m-%d'),
+            'fromDate': expire_date.strftime('%Y-%m-%d'),
+            'toDate': expire_date.strftime('%Y-%m-%d'),
             'strikeCount': strike_count
         }
         self.logger.debug(f"getting weekly single options chain for {symbol} with params : {params}")
@@ -68,9 +65,7 @@ class OptionsChainApi(Api):
         self.logger.debug(f"response : {response.status_code}")
         response_data = response.json()
 
-        puts = self._build_contracts_list(next_friday, response_data['putExpDateMap'])
-        calls = self._build_contracts_list(next_friday, response_data['callExpDateMap'])
+        puts = self._build_contracts_list(expire_date, response_data['putExpDateMap'])
+        calls = self._build_contracts_list(expire_date, response_data['callExpDateMap'])
 
-        return {k: (calls[k], puts[k])
-            for k in calls.keys()
-        }
+        return {k: (calls[k], puts[k]) for k in calls.keys()}

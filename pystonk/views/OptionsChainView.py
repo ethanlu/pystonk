@@ -8,12 +8,13 @@ import random
 
 
 class OptionsChainView(View):
-    def __init__(self, symbol: str, premium: float, latest_price: float, options_chain: OptionsChain):
+    def __init__(self, symbol: str, premium: float, latest_price: float, expiration: str, options_chain: OptionsChain):
         super().__init__()
 
         self._symbol = symbol
         self._premium = premium
         self._latest_price = latest_price
+        self._expiration = 'this week' if expiration == 'current' else f"next {expiration}"
         self._options_chain = options_chain
 
         self._sell_call = self._options_chain.closest_call_option(self._premium)
@@ -88,7 +89,7 @@ class OptionsChainView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is options chain for `{self._symbol}` with target premium `{self._premium}`"
+                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is the options chain for `{self._symbol}` with target premium `{self._premium}` that expires `{self._expiration}`"
                 }
             },
             {

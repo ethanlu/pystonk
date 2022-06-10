@@ -8,22 +8,49 @@ def percent_diff(old: float, new: float) -> float:
     return round(((new - old) / old) * 100, 2)
 
 
-def get_next_monday_friday(d: date) -> Tuple[date, date]:
+def get_friday_of_week(d: date) -> date:
     """
-    returns tuple of the next week's monday and friday date relative to the given date
+    returns the friday date of the week given date is in
     :param d:
     :return:
     """
-    next_week = d + timedelta(weeks=1)
-    return next_week + timedelta(days=-next_week.weekday()), next_week + timedelta(days=(4 - next_week.weekday()))
+    return d + timedelta(days=(4 - d.weekday()))
+
+
+def get_third_friday_of_month(d: date) -> date:
+    """
+    returns the third friday date of the month given date is in
+    :param d:
+    :return:
+    """
+    month_day1 = date(d.year, d.month, 1)
+    return month_day1 + timedelta(weeks=(2 if month_day1.weekday() <= 4 else 3), days=(4 - month_day1.weekday()))
+
+
+def get_third_friday_of_quarter(d: date):
+    """
+    returns the third friday date of the month given date is in
+    :param d:
+    :param q:
+    :return:
+    """
+    quarter_day1 = date(d.year, max(((min(d.month, 11) // 3) * 3), 1), 1)
+    return quarter_day1 + timedelta(weeks=(2 if quarter_day1.weekday() <= 4 else 3), days=(4 - quarter_day1.weekday()))
+
+
+def get_third_friday_of_half(d: date):
+    """
+    returns the third friday date of the month given date is in
+    :param d:
+    :param q:
+    :return:
+    """
+    half_day1 = date(d.year, max(((min(d.month, 11) // 6) * 6), 1), 1)
+    return half_day1 + timedelta(weeks=(2 if half_day1.weekday() <= 4 else 3), days=(4 - half_day1.weekday()))
 
 
 def is_number(n: Any) -> bool:
     return re.match(r"^\d*\.?\d*$", n) is not None
-
-
-def is_stock(n: Any) -> bool:
-    return re.match(r"^[a-zA-Z.]+$", n) is not None
 
 
 def coalesce(data: Dict, key: Tuple, default: Any = None) -> Any:

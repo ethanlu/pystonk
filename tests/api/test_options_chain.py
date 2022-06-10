@@ -246,9 +246,9 @@ class OptionsChainApiTest(TestCase):
     def testPriceHistory(self, requests_mock):
         requests_mock.get.return_value = self._mock_optionschain_response
         o = OptionsChainApi('some key')
-        r = o.get_weekly_single_option_chain(
+        r = o.get_single_option_chain(
             symbol='test',
-            week_date=date(2019, 12, 29)
+            expire_date=date(2020, 1, 3)
         )
 
         self.assertEqual(requests_mock.get.call_count, 1, "Mocked requests not called")
@@ -268,9 +268,9 @@ class OptionsChainApiTest(TestCase):
     def testPriceHistoryInvalid(self, requests_mock):
         requests_mock.get.return_value = self._mock_optionschain_response
         o = OptionsChainApi('some key')
-        r = o.get_weekly_single_option_chain(
+        r = o.get_single_option_chain(
             symbol='test',
-            week_date=date(2020, 1, 1)
+            expire_date=date(2020, 1, 1)
         )
 
         self.assertEqual(requests_mock.get.call_count, 1, "Mocked requests not called")
