@@ -60,16 +60,19 @@ class HelpView(View):
             ]
 
         for h in self._help:
-            usage_text = h.command
+            required_usage = ""
+            optional_usage = ""
             required_text = []
             optional_text = []
 
             if len(h.required_parameters) > 0:
-                usage_text += ' {' + '} {'.join([action.dest for action in h.required_parameters]) + '}'
-                required_text = [f"`{action.dest}:{action.type.__name__}` - {action.help}" for action in h.required_parameters]
+                for action in h.required_parameters:
+                    required_usage += ' {' + action.dest + '}'
+                    required_text.append(f"`{action.dest}:{action.type.__name__}` - {action.help}")
             if len(h.optional_parameters) > 0:
-                usage_text += ' [' + '] ['.join([', '.join(action.option_strings) for action in h.optional_parameters]) + ']'
-                optional_text = [f"`{', '.join(action.option_strings)}` - {action.help}" for action in h.optional_parameters]
+                for action in h.optional_parameters:
+                    optional_usage += f"\n\t\t\t\t`[{', '.join(action.option_strings) + (' {choice}' if action.choices else '')}]`"
+                    optional_text.append(f"`{', '.join(action.option_strings)}` - {action.help}")
 
             response += [
                 {
@@ -80,7 +83,7 @@ class HelpView(View):
                     "text": {
                         "type": "mrkdwn",
                         "text": f"*{h.name}* \n{h.description} \n\n" +
-                                f"*Usage*: \n\t\t `{usage_text}` \n\n" +
+                                f"*Usage*: \n\t\t `{h.command}{required_usage}`{optional_usage} \n\n" +
                                 f"*Required Parameters*: \n\t\t" + "\n\t\t".join(required_text) + "\n\n" +
                                 f"*Optional Parameters*: \n\t\t" + "\n\t\t".join(optional_text) + "\n\n"
                     }
