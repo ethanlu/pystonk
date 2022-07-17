@@ -30,8 +30,8 @@ class PriceHistoryTest(TestCase):
         o = PriceHistory(self._candlesticks)
 
         self.assertEqual(o.count_intervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
-        self.assertEqual(o.count_intervals_exceed_percent_threshold(percent), 10, "PriceHistory did not return expected number of intervals that exceeded threshold")
-        self.assertEqual(o.percent_rate(percent), 76.92, "PriceHistory did not return expected percent probability")
+        self.assertEqual(o.count_intervals_exceed_percent_threshold(percent), 5, "PriceHistory did not return expected number of intervals that exceeded threshold")
+        self.assertEqual(o.percent_rate(percent), 38.46, "PriceHistory did not return expected percent probability")
 
     def testEmptyReport(self):
         percent = 11.0
@@ -40,3 +40,13 @@ class PriceHistoryTest(TestCase):
         self.assertEqual(o.count_intervals(), len(self._candlesticks), "PriceHistory did not return expected number of intervals")
         self.assertEqual(o.count_intervals_exceed_percent_threshold(percent), 0, "PriceHistory did not return expected number of intervals that exceeded threshold")
         self.assertEqual(o.percent_rate(percent), 0, "PriceHistory did not return expected percent probability")
+
+    def testCloseToClosePercentDifference(self):
+        o = PriceHistory(self._candlesticks, False)
+        self.assertEqual([5.0, -9.52, 8.42, 0.0, 0.97, 0.0, 0.0, 0.0, -5.77, -8.16, 2.22, 0.0, 1.09], o.percent_change_intervals(),
+                         "PriceHistory did not return expected percent change intervals for close-to-close")
+
+    def testOpenToClosePercentDifference(self):
+        o = PriceHistory(self._candlesticks, True)
+        self.assertEqual([5.0, -5.0, 3.0, 3.0, 4.0, 4.0, 4.0, 4.0, -2.0, -10.0, -8.0, -8.0, -7.0], o.percent_change_intervals(),
+                         "PriceHistory did not return expected percent change intervals for start-to-close")

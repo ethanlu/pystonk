@@ -12,7 +12,7 @@ class PriceHistory(LoggerMixin):
 
         open_price = None
         for c in self._candlesticks:
-            if not start_to_end or not open_price:
+            if start_to_end or not open_price:
                 open_price = c.open_price
             close_price = c.close_price
             self._percent_changes.append(percent_diff(open_price, close_price))
