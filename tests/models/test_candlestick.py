@@ -31,4 +31,3 @@ class CandleStickTest(TestCase):
             "CandleStick did not normalize start datetime"
         )
         self.assertEqual(o.frequency_type, FrequencyType.WEEKLY, "CandleStick did not normalize frequency type")
-        self.assertEqual(o.percent_change, 50.00, "CandleStick did not calculate percent change correctly")

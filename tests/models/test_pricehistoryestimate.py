@@ -1,6 +1,7 @@
 from pystonk.api.Types import FrequencyType
 from pystonk.models.CandleStick import CandleStick
 from pystonk.models.PriceHistoryEstimate import PriceHistoryEstimate
+from pystonk.utils import percent_diff
 
 from datetime import datetime
 from unittest import TestCase
@@ -25,7 +26,7 @@ class PriceHistoryEstimateTest(TestCase):
         ]
 
     def testPriceChangeInstantiation(self):
-        o = PriceHistoryEstimate(self.fixtureCandleSticks())
+        o = PriceHistoryEstimate([percent_diff(d.open_price, d.close_price) for d in self.fixtureCandleSticks()])
 
         self.assertIsInstance(o, PriceHistoryEstimate)
         self.assertEqual(o.min(), -10.0, "PriceHistoryEstimate did not calculate expected min")
