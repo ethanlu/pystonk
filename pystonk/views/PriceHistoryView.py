@@ -49,8 +49,8 @@ class PriceHistoryView(View):
         self._t.align = 'r'
 
         rows = []
-        for candlestick in self._price_history.intervals():
-            over_threshold = abs(candlestick.percent_change) >= self._percent
+        for percent_change, candlestick in zip(self._price_history.percent_change_intervals(), self._price_history.intervals()):
+            over_threshold = abs(percent_change) >= self._percent
             if self._verbose or over_threshold:
                 # show all or only rows over threshold if verbosity is disabled
                 rows.append((
@@ -58,7 +58,7 @@ class PriceHistoryView(View):
                     candlestick.start_datetime.strftime('%Y-%m-%d'),
                     '%7.2f' % candlestick.open_price,
                     '%7.2f' % candlestick.close_price,
-                    candlestick.percent_change
+                    percent_change
                 ))
         # only show last TRUNCATE_HISTORY_LIMIT if verbosity is disabled
         self._t.add_rows(rows if self.verbose else rows[-self.TRUNCATED_HISTORY_LIMIT:])

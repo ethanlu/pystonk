@@ -7,9 +7,8 @@ import numpy as np
 
 
 class PriceHistoryEstimate(object):
-    def __init__(self, data: List[CandleStick]):
-        self._raw_data = data
-        self._data = [c.percent_change for c in self._raw_data]
+    def __init__(self, data: List[float]):
+        self._data = data
         self._mean = np.mean(self._data)
         self._std = np.std(self._data)
         self._min = min(self._data)

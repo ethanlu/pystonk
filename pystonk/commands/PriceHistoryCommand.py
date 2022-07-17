@@ -60,6 +60,11 @@ class PriceHistoryCommand(Command):
                  f"\n\t\t\t\tdefault : `{str(self.DEFAULT_PERIOD)}`" +
                  f"\n\t\t\t\tmonths for daily frequency, years for all others"
         )
+        self._parser.add_argument(
+            '-s', '--startend',
+            action='store_true',
+            help='calculate percent difference from interval start to interval end (instead of from previous interval end)'
+        )
 
         self._quote_api = quote_api
         self._price_history_api = price_history_api
@@ -77,6 +82,7 @@ class PriceHistoryCommand(Command):
         percent = abs(round(args.percent, 2))
         frequency_type = FrequencyType(args.frequency)
         period = args.period
+        start_to_end = args.startend
 
         if self._quote_api.get_quote(symbol):
             period_type = PeriodType.YEAR
@@ -86,20 +92,20 @@ class PriceHistoryCommand(Command):
                 # period of 5 is only valid for weekly and monthly frequencies. for daily, period of 5 must be 6
                 period = period if period != 5 else 6
 
-            candlesticks = self._price_history_api.get_price_history(
+            price_history = PriceHistory(self._price_history_api.get_price_history(
                 symbol=symbol,
                 period_type=period_type,
                 period=period,
                 frequency_type=frequency_type,
                 frequency=1
-            )
+            ), start_to_end)
 
             return PriceHistoryView(
                 symbol=symbol,
                 percent=percent,
                 frequency_type=frequency_type,
-                price_history=PriceHistory(candlesticks),
-                price_history_estimate=PriceHistoryEstimate(candlesticks)
+                price_history=price_history,
+                price_history_estimate=PriceHistoryEstimate(price_history.percent_change_intervals())
             )
         else:
             return ErrorView(f"{symbol} is not found...")
