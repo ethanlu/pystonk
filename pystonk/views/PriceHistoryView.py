@@ -50,7 +50,7 @@ class PriceHistoryView(View):
 
         rows = []
         for percent_change, candlestick in zip(self._price_history.percent_change_intervals(), self._price_history.intervals()):
-            over_threshold = abs(percent_change) >= self._percent
+            over_threshold = (percent_change >= self._percent) if self._percent >= 0 else (percent_change <= self._percent)
             if self._verbose or over_threshold:
                 # show all or only rows over threshold if verbosity is disabled
                 rows.append((

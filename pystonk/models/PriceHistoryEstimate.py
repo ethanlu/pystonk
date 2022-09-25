@@ -58,4 +58,7 @@ class PriceHistoryEstimate(object):
         return self._data, [round(v, 4) for v in self._pdf]
 
     def percent_probability(self, percent: float) -> float:
-        return round((1 - self._cdf(percent)) * 100, 2)
+        if percent >= 0:
+            return round((1 - self._cdf(percent)) * 100, 2)
+        else:
+            return round(self._cdf(percent) * 100, 2)

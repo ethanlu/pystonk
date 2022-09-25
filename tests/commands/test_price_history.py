@@ -32,6 +32,9 @@ class PriceHistoryCommandTest(TestCase):
 
         self.assertIsInstance(o.execute('ph abc 10'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
         self.assertIsInstance(o.execute('ph def 10.0'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph abc -10'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def -10.0'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
+        self.assertIsInstance(o.execute('ph def 0.0'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
         self.assertIsInstance(o.execute('ph def 1 -v'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
         self.assertIsInstance(o.execute('ph def 1 --verbose'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")
         self.assertIsInstance(o.execute('ph def 2 -f weekly'), PriceHistoryView, "PriceHistoryCommand did not return expected PriceHistoryView when correct parameters are passed")

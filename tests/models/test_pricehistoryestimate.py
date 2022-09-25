@@ -44,6 +44,7 @@ class PriceHistoryEstimateTest(TestCase):
         self.assertEqual(2.5, o.histogram_bins_interval(), "PriceHistoryEstimate did not calculate expected histogram bin interval")
 
         self.assertEqual(o.percent_probability(15), .69, "PriceHistoryEstimate did not calculate percent probability correctly for weighted and unweighted")
+        self.assertEqual(o.percent_probability(-15), 1.34, "PriceHistoryEstimate did not calculate percent probability correctly for weighted and unweighted")
 
         x, y = o.pdf()
         self.assertEqual(len(x), len(y), "PriceHistoryEstimate did not calculate pdf with expected values")

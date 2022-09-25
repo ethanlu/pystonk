@@ -39,7 +39,7 @@ class PriceHistoryCommand(Command):
         self._parser.add_argument(
             'percent',
             type=float,
-            help='percent threshold to exceed (absolute value)'
+            help='percent threshold to exceed (greater than when positive, less than when negative)'
         )
         self._parser.add_argument(
             '-f', '--frequency',
@@ -79,7 +79,7 @@ class PriceHistoryCommand(Command):
 
     def process(self, args: Namespace) -> Type[View]:
         symbol = args.symbol.upper()
-        percent = abs(round(args.percent, 2))
+        percent = round(args.percent, 2)
         frequency_type = FrequencyType(args.frequency)
         period = args.period
         start_to_end = args.startend

@@ -28,7 +28,10 @@ class PriceHistory(LoggerMixin):
         return len(self._candlesticks)
 
     def count_intervals_exceed_percent_threshold(self, percent: float) -> int:
-        return len([1 for pc in self._percent_changes if abs(pc) >= percent])
+        if percent >= 0:
+            return len([1 for pc in self._percent_changes if pc >= percent])
+        else:
+            return len([1 for pc in self._percent_changes if pc <= percent])
 
     def percent_rate(self, percent: float):
         return round((self.count_intervals_exceed_percent_threshold(percent)/self.count_intervals()) * 100, 2)
