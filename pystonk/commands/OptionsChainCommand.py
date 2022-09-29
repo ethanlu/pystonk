@@ -3,7 +3,7 @@ from pystonk.api.QuoteApi import QuoteApi
 from pystonk.commands import Command
 from pystonk.models.OptionsChain import OptionsChain
 from pystonk.utils.CustomArgParser import CustomArgParser
-from pystonk.utils import get_friday_of_week, get_third_friday_of_month, get_third_friday_of_quarter, get_third_friday_of_half
+from pystonk.utils import get_friday_of_week, get_third_friday_of_month, get_third_friday_of_quarter, get_third_friday_of_half, get_closest_monday_wednesday_friday_of_date
 from pystonk.views import View
 from pystonk.views.ErrorView import ErrorView
 from pystonk.views.OptionsChainView import OptionsChainView
@@ -77,7 +77,11 @@ class OptionsChainCommand(Command):
         if quote:
             today = date.today()
             if expiration == 'current':
-                expire_date = get_friday_of_week(today)
+                if symbol == 'SPY':
+                    # spy etf has 2dte options (every mon, wed, fri)
+                    expire_date = get_closest_monday_wednesday_friday_of_date(today)
+                else:
+                    expire_date = get_friday_of_week(today)
             if expiration == 'week':
                 expire_date = get_friday_of_week(today + timedelta(weeks=1))
             if expiration == 'month':
@@ -87,9 +91,9 @@ class OptionsChainCommand(Command):
                 expire_date = get_third_friday_of_quarter(date(today.year if next_q < 12 else (today.year + 1), next_q if next_q < 12 else 1, 1))
             if expiration == 'half':
                 next_h = today.month + 6
-                expire_date = get_third_friday_of_quarter(date(today.year if next_h < 12 else (today.year + 1), next_h if next_h < 12 else 1, 1))
+                expire_date = get_third_friday_of_half(date(today.year if next_h < 12 else (today.year + 1), next_h if next_h < 12 else 1, 1))
             if expiration == 'year':
-                expire_date = get_third_friday_of_quarter(date(today.year + 1, today.month, today.day))
+                expire_date = get_third_friday_of_half(date(today.year + 1, today.month, today.day))
 
             return OptionsChainView(
                 symbol=symbol,
@@ -97,6 +101,7 @@ class OptionsChainCommand(Command):
                 use_percent=use_percent,
                 latest_price=quote.price,
                 expiration=expiration,
+                expiration_date=expire_date,
                 options_chain=OptionsChain(
                     quote.price,
                     self._options_chain_api.get_single_option_chain(

@@ -41,6 +41,8 @@ class OptionsChainCommandTest(TestCase):
 
         self.assertIsInstance(o.execute('oc def 10.0 -p'), OptionsChainView, "OptionsChainCommand did not return expected PriceHistoryView when correct parameters are passed")
 
+        self.assertIsInstance(o.execute('oc spy 5.0 -e current'), OptionsChainView, "OptionsChainCommand did not return expected PriceHistoryView when spy is passed")
+
     def testOptionsChainCommandHelpResponse(self):
         o = OptionsChainCommand(self._mock_api, self._mock_api)
 

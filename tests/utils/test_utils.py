@@ -1,4 +1,4 @@
-from pystonk.utils import get_friday_of_week, get_third_friday_of_month, get_third_friday_of_quarter, get_third_friday_of_half, is_number, percent_diff, coalesce
+from pystonk.utils import get_friday_of_week, get_third_friday_of_month, get_third_friday_of_quarter, get_third_friday_of_half, get_closest_monday_wednesday_friday_of_date, is_number, percent_diff, coalesce
 
 from datetime import date
 from unittest import TestCase
@@ -224,6 +224,31 @@ class UtilsTest(TestCase):
 
         f = get_third_friday_of_half(date(2024, 12, 31))
         self.assertEqual(f, date(2024, 6, 21))
+
+    def testGetClosestMondayWednesdayFridayOfDate(self):
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 1))
+        self.assertEqual(f, date(2022, 1, 3))
+
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 2))
+        self.assertEqual(f, date(2022, 1, 3))
+
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 3))
+        self.assertEqual(f, date(2022, 1, 3))
+
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 4))
+        self.assertEqual(f, date(2022, 1, 5))
+
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 5))
+        self.assertEqual(f, date(2022, 1, 5))
+
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 6))
+        self.assertEqual(f, date(2022, 1, 7))
+
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 7))
+        self.assertEqual(f, date(2022, 1, 7))
+
+        f = get_closest_monday_wednesday_friday_of_date(date(2022, 1, 8))
+        self.assertEqual(f, date(2022, 1, 10))
 
     def testIsFloat(self):
         self.assertTrue(is_number('1.0'))

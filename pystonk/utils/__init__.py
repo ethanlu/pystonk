@@ -8,6 +8,22 @@ def percent_diff(old: float, new: float) -> float:
     return round(((new - old) / old) * 100, 2)
 
 
+def get_closest_monday_wednesday_friday_of_date(d: date) -> date:
+    """
+    from given date, return closet monday, wednesday, or friday date that has not passed yet
+    :param d:
+    :return:
+    """
+    if d.weekday() < 1:
+        return d
+    elif d.weekday() < 3:
+        return d + timedelta(days=(2 - d.weekday()))
+    elif d.weekday() < 5:
+        return d + timedelta(days=(4 - d.weekday()))
+    else:
+        return d + timedelta(days=(7 - d.weekday()))
+
+
 def get_friday_of_week(d: date) -> date:
     """
     returns the friday date of the week given date is in

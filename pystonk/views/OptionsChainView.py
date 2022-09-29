@@ -1,6 +1,7 @@
 from pystonk.models.OptionsChain import OptionsChain
 from pystonk.views import View
 
+from datetime import date
 from prettytable import PrettyTable
 from typing import Dict, List, Tuple
 
@@ -8,14 +9,15 @@ import random
 
 
 class OptionsChainView(View):
-    def __init__(self, symbol: str, target: float, use_percent: bool, latest_price: float, expiration: str, options_chain: OptionsChain):
+    def __init__(self, symbol: str, target: float, use_percent: bool, latest_price: float, expiration: str, expiration_date: date, options_chain: OptionsChain):
         super().__init__()
 
         self._symbol = symbol
         self._target = target
         self._use_percent = use_percent
         self._latest_price = latest_price
-        self._expiration = 'this week' if expiration == 'current' else f"next {expiration}"
+        self._expiration_date = expiration_date
+        self._expiration = f"this {self._expiration_date.strftime('%A')}" if expiration == 'current' else f"next {expiration}"
         self._options_chain = options_chain
 
         if self._use_percent:
@@ -96,7 +98,7 @@ class OptionsChainView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is the options chain for `{self._symbol}` with target {self._format_target()} that expires `{self._expiration}`"
+                    "text": f"{random.choice(self.SLACK_OK_EMOJI)} \n Here is the options chain for `{self._symbol}` with target {self._format_target()} that expires `{self._expiration}` (on `{self._expiration_date.strftime('%Y-%m-%d')}`)"
                 }
             },
             {
