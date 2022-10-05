@@ -1,5 +1,3 @@
-from pystonk.models.CandleStick import CandleStick
-
 from scipy.stats import norm
 from typing import List, Tuple
 
@@ -26,7 +24,7 @@ class PriceHistoryEstimate(object):
         diff = abs(self._max - self._min)
 
         interval = 1.0
-        if 10 < diff <= 50:
+        if 25 < diff <= 50:
             interval = 2.5
         if 50 < diff:
             interval = 5.0
