@@ -109,35 +109,33 @@ class SupportResistanceSearchTest(TestCase):
     def testNoSupportResistanceIdentification(self):
         o = SupportResistanceSearch(self.fixtureNoSupportResistance())
         self.assertIsInstance(o, SupportResistanceSearch)
-        self.assertEqual(o.supports(1.0), {}, "SupportResistanceSearch did not return expected empty supports")
-        self.assertEqual(o.resistances(1.0), {}, "SupportResistanceSearch did not return expected empty resistance")
+        self.assertEqual(o.supports(), [], "SupportResistanceSearch did not return expected empty supports")
+        self.assertEqual(o.resistances(), [], "SupportResistanceSearch did not return expected empty resistance")
 
     def testSupportIdentification(self):
         o = SupportResistanceSearch(self.fixtureSupport())
-        s = o.supports(2.0)
-        r = o.resistances(2.0)
+        s = o.supports()
+        r = o.resistances()
 
-        self.assertEqual(list(s.keys()), ['100.72'], "SupportResistanceSearch did not return expected support keys")
-        self.assertEqual(len(s['100.72']), 1, "SupportResistanceSearch did not return expected number of support prices")
-        self.assertEqual(s['100.72'][0].close_price, 100.72, "SupportResistanceSearch did not return expected support price")
-        self.assertEqual(s['100.72'][0].start_datetime, datetime.strptime('2022-01-24', '%Y-%m-%d'), "SupportResistanceSearch did not return expected support price datetime")
-        self.assertEqual(r, {}, "SupportResistanceSearch did not return expected empty resistance")
+        self.assertEqual(len(s), 1, "SupportResistanceSearch did not return expected number of supports")
+        self.assertEqual(s[0].close_price, 100.72, "SupportResistanceSearch did not return expected support price")
+        self.assertEqual(s[0].start_datetime, datetime.strptime('2022-01-24', '%Y-%m-%d'), "SupportResistanceSearch did not return expected support price datetime")
+        self.assertEqual(r, [], "SupportResistanceSearch did not return expected empty resistance")
 
     def testResistanceIdentification(self):
         o = SupportResistanceSearch(self.fixtureResistance())
-        s = o.supports(2.0)
-        r = o.resistances(2.0)
+        s = o.supports()
+        r = o.resistances()
 
-        self.assertEqual(s, {}, "SupportResistanceSearch did not return expected empty support")
-        self.assertEqual(list(r.keys()), ['106.72'], "SupportResistanceSearch did not return expected resistance keys")
-        self.assertEqual(len(r['106.72']), 1, "SupportResistanceSearch did not return expected number of resistance prices")
-        self.assertEqual(r['106.72'][0].close_price, 106.72, "SupportResistanceSearch did not return expected resistance price")
-        self.assertEqual(r['106.72'][0].start_datetime, datetime.strptime('2022-02-14', '%Y-%m-%d'), "SupportResistanceSearch did not return expected resistance price datetime")
+        self.assertEqual(s, [], "SupportResistanceSearch did not return expected empty support")
+        self.assertEqual(len(r), 1, "SupportResistanceSearch did not return expected number of resistance price")
+        self.assertEqual(r[0].close_price, 106.72, "SupportResistanceSearch did not return expected resistance price")
+        self.assertEqual(r[0].start_datetime, datetime.strptime('2022-02-14', '%Y-%m-%d'), "SupportResistanceSearch did not return expected resistance price datetime")
 
-    def testMultipleSupportResistanceIdentification(self):
+    def testGroupedMultipleSupportResistanceIdentification(self):
         o = SupportResistanceSearch(self.fixutureMultipleSupportResistance())
 
-        s = o.supports(2.0)
+        s = o.group_prices(o.supports(), 2.0)
         self.assertEqual(list(s.keys()), ['100.53'], "SupportResistanceSearch did not return expected support keys")
         self.assertEqual(len(s['100.53']), 2, "SupportResistanceSearch did not return expected number of support prices")
         self.assertEqual(s['100.53'][0].close_price, 100.72, "SupportResistanceSearch did not return expected support price")
@@ -145,7 +143,7 @@ class SupportResistanceSearchTest(TestCase):
         self.assertEqual(s['100.53'][1].close_price, 100.35, "SupportResistanceSearch did not return expected support price")
         self.assertEqual(s['100.53'][1].start_datetime, datetime.strptime('2022-09-26', '%Y-%m-%d'), "SupportResistanceSearch did not return expected support price datetime")
 
-        r = o.resistances(2.0)
+        r = o.group_prices(o.resistances(), 2.0)
         self.assertEqual(list(r.keys()), ['106.72', '110.51'], "SupportResistanceSearch did not return expected resistance keys")
         self.assertEqual(len(r['106.72']), 1, "SupportResistanceSearch did not return expected number of resistance prices")
         self.assertEqual(r['106.72'][0].close_price, 106.72, "SupportResistanceSearch did not return expected resistance price")

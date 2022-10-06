@@ -26,7 +26,7 @@ class SupportResistanceSearch(object):
             i = i + 1
         return prices
 
-    def _group_prices(self, prices: List[CandleStick], threshold: float) -> Dict[str, List[CandleStick]]:
+    def group_prices(self, prices: List[CandleStick], threshold: float) -> Dict[str, List[CandleStick]]:
         grouped_prices = {}
         current_key = None
         current_group = []
@@ -42,8 +42,8 @@ class SupportResistanceSearch(object):
             grouped_prices[str(current_key)] = sorted(current_group, key=lambda x: x.start_datetime)
         return grouped_prices
 
-    def supports(self, threshold: float) -> Dict[str, List[CandleStick]]:
-        return self._group_prices(self._get_prices(True), threshold)
+    def supports(self) -> List[CandleStick]:
+        return self._get_prices(True)
 
-    def resistances(self, threshold: float) -> Dict[str, List[CandleStick]]:
-        return self._group_prices(self._get_prices(False), threshold)
+    def resistances(self) -> List[CandleStick]:
+        return self._get_prices(False)

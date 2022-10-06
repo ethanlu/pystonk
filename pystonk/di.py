@@ -5,6 +5,7 @@ from pystonk.api.QuoteApi import QuoteApi
 from pystonk.commands.PriceCheckCommand import PriceCheckCommand
 from pystonk.commands.PriceHistoryCommand import PriceHistoryCommand
 from pystonk.commands.OptionsChainCommand import OptionsChainCommand
+from pystonk.commands.SupportResistanceCommand import SupportResistanceCommand
 
 from dependency_injector import containers, providers
 from pyhocon import ConfigFactory
@@ -45,6 +46,10 @@ class Container(containers.DeclarativeContainer):
             providers.Singleton(
                 PriceHistoryCommand,
                 quote_api(),
+                price_history_api()
+            )(),
+            providers.Singleton(
+                SupportResistanceCommand,
                 price_history_api()
             )()
         ]
