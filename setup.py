@@ -32,7 +32,7 @@ def load_requirements():
 
 setup(
     name="pystonk",
-    version="1.2.0",
+    version="1.3.0",
     author="Ethan Lu",
     author_email="fang.lu@gmail.com",
     description="Python Stocks & Options Tool",

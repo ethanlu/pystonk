@@ -35,7 +35,7 @@ class OptionsChainView(View):
         self._t.align = 'r'
 
     def _format_target(self):
-        return f"percent change `{self._target}%`" if self._use_percent else f"percent change `${self._target}`"
+        return f"percent change `{self._target}%`" if self._use_percent else f"premium `${self._target}`"
 
     def _build_table(self) -> List[Dict]:
         rows = []
