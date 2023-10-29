@@ -27,7 +27,8 @@ def load_requirements():
             "scipy",
             "slack_bolt",
             "termcolor",
-            "wheel"
+            "wheel",
+            "urllib3<2"
         ]
 
 setup(
