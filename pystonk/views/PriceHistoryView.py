@@ -79,8 +79,7 @@ class PriceHistoryView(View):
                 "text": {
                     "type": "mrkdwn",
                     "text": f"*Total {self._interval_label.capitalize()}*: `{self._price_history.count_intervals()}`\n" +
-                            f"*{self._interval_label.capitalize()} Exceeding Percent Threshold*: `{self._price_history.count_intervals_exceed_percent_threshold(self._percent)}` \n" +
-                            f"*Percent Threshold Exceed Rate*: `{self._price_history.percent_rate(self._percent)}%`"
+                            f"*{self._interval_label.capitalize()} Exceeding Percent Threshold*: `{self._price_history.count_intervals_exceed_percent_threshold(self._percent)}`"
                 }
             }
         ]
@@ -103,7 +102,9 @@ class PriceHistoryView(View):
                             f"*Percent Change Max*: `{self._price_history_estimate.max()}` \n" +
                             f"*Percent Change Mean*: `{self._price_history_estimate.mean()}` \n" +
                             f"*Percent Change STD*: `{self._price_history_estimate.std()}` \n" +
-                            f"*Percent Threshold Exceed Probability*: `{self._price_history_estimate.percent_probability(self._percent)}%`"
+                            f"*Percent Change Skewness*: `{self._price_history_estimate.skew()}` \n" +
+                            f"*Percent Change Kurtosis*: `{self._price_history_estimate.kurtosis()}` \n" +
+                            f"*Probability Exceeding Percent Threshold*: `{self._price_history_estimate.percent_probability(self._percent)}%`"
                 }
             }
         ]

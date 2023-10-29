@@ -33,6 +33,8 @@ class PriceHistoryEstimateTest(TestCase):
         self.assertEqual(o.max(), 10.0, "PriceHistoryEstimate did not calculate expected max")
         self.assertEqual(o.mean(), -.8, "PriceHistoryEstimate did not calculate expected mean")
         self.assertEqual(o.std(), 6.42, "PriceHistoryEstimate did not calculate expected STD")
+        self.assertEqual(o.skew(), .01, "PriceHistoryEstimate did not calculate expected skew")
+        self.assertEqual(o.kurtosis(), -1.28, "PriceHistoryEstimate did not calculate expected kurtosis")
 
         bins = o.histogram_bins()
         self.assertEqual(bins, [-10.5, -9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5], "PriceHistoryEstimate did not calculate expected bins for histogram")

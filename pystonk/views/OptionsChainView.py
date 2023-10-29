@@ -75,7 +75,7 @@ class OptionsChainView(View):
                     f"*Put*: `${p[0].bid if is_sell else p[0].ask}` @ `{p[0].strike_price}` on `{p[0].expiration_datetime.strftime('%Y-%m-%d')}` (`{p[2]}%` from `{last_price}`)")
 
             if c and p:
-                info.append(f"*Skew*: `{round(c[1] + p[1], 2)}`")
+                info.append(f"*Call/Put Strike Difference*: `{round(c[1] + p[1], 2)}`")
 
             return [
                 {

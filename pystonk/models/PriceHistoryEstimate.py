@@ -1,4 +1,4 @@
-from scipy.stats import norm
+from scipy.stats import kurtosis, norm, skew
 from typing import List, Tuple
 
 import numpy as np
@@ -9,6 +9,8 @@ class PriceHistoryEstimate(object):
         self._data = data
         self._mean = np.mean(self._data)
         self._std = np.std(self._data)
+        self._skew = skew(np.array(self._data))
+        self._kurtosis = kurtosis(self._data)
         self._min = min(self._data)
         self._max = max(self._data)
 
@@ -24,9 +26,9 @@ class PriceHistoryEstimate(object):
         diff = abs(self._max - self._min)
 
         interval = 1.0
-        if 25 < diff <= 50:
+        if 50 < diff <= 100:
             interval = 2.5
-        if 50 < diff:
+        if 100 < diff:
             interval = 5.0
 
         return list(np.arange((interval * round(self._min / interval) - interval), (interval * round(self._max / interval) + interval), interval))
@@ -42,6 +44,12 @@ class PriceHistoryEstimate(object):
 
     def max(self) -> float:
         return round(self._max, 2)
+
+    def skew(self) -> float:
+        return round(float(self._skew), 2)
+
+    def kurtosis(self) -> float:
+        return round(float(self._kurtosis), 2)
 
     def histogram(self) -> List:
         return [round(d, 2) for d in self._histogram.tolist()]
