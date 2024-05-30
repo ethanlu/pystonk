@@ -19,17 +19,20 @@ class Container(containers.DeclarativeContainer):
 
     options_chain_api = providers.Singleton(
         OptionsChainApi,
-        api_key=configuration()['api_key']
+        app_key=configuration()['app_key'],
+        app_secret=configuration()['app_secret']
     )
 
     price_history_api = providers.Singleton(
         PriceHistoryApi,
-        api_key=configuration()['api_key']
+        app_key=configuration()['app_key'],
+        app_secret=configuration()['app_secret']
     )
 
     quote_api = providers.Singleton(
         QuoteApi,
-        api_key=configuration()['api_key']
+        app_key=configuration()['app_key'],
+        app_secret=configuration()['app_secret']
     )
 
     available_commands = providers.Object(
