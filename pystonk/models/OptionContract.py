@@ -45,7 +45,7 @@ class OptionContract(object):
         self._open_interest = open_interest
         self._in_the_money = in_the_money
         self._non_standard = non_standard
-        self._expiration_datetime = datetime.strptime(expiration_datetime.split('+')[0], "%Y-%m-%dT%H:%M:%S")
+        self._expiration_datetime = datetime.strptime(expiration_datetime.split('.')[0], "%Y-%m-%dT%H:%M:%S")
         self._last_trading_datetime = datetime.fromtimestamp(last_trading_datetime / 1000)
 
     @property

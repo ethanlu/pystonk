@@ -29,7 +29,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 90,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -51,7 +51,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 95,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -73,7 +73,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 100,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -95,7 +95,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 105,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -117,7 +117,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 110,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -143,7 +143,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 90,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -165,7 +165,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 95,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -187,7 +187,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 100,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -209,7 +209,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 105,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -231,7 +231,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 110,
-                            "expirationDate": "2020-01-03T01:00:00+00:00",
+                            "expirationDate": "2020-01-03T01:00:00.000+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False

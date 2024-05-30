@@ -11,24 +11,24 @@ class WeeklyOptionsReportTest(TestCase):
         self._latest_price = 100.25
         self._contracts = {
             '90.00': (
-                OptionContract('CALL', 'TEST_C90', 'test call 90', 90.00, 9.00, 9.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000),
-                OptionContract('PUT', 'TEST_P90', 'test put 90', 90.00, .5, .56, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000)
+                OptionContract('CALL', 'TEST_C90', 'test call 90', 90.00, 9.00, 9.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000),
+                OptionContract('PUT', 'TEST_P90', 'test put 90', 90.00, .5, .56, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000)
             ),
             '95.00': (
-                OptionContract('CALL', 'TEST_C95', 'test call 95', 95.00, 5.00, 5.05, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000),
-                OptionContract('PUT', 'TEST_P95', 'test put 95', 95.00, 1.0, 1.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000)
+                OptionContract('CALL', 'TEST_C95', 'test call 95', 95.00, 5.00, 5.05, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000),
+                OptionContract('PUT', 'TEST_P95', 'test put 95', 95.00, 1.0, 1.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000)
             ),
             '100.00': (
-                OptionContract('CALL', 'TEST_C100', 'test call 100', 100.00, 1.00, 1.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000),
-                OptionContract('PUT', 'TEST_P100', 'test put 100', 100.00, 2.25, 2.26, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000)
+                OptionContract('CALL', 'TEST_C100', 'test call 100', 100.00, 1.00, 1.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000),
+                OptionContract('PUT', 'TEST_P100', 'test put 100', 100.00, 2.25, 2.26, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000)
             ),
             '105.00': (
-                OptionContract('CALL', 'TEST_C105', 'test call 105', 105.00, .75, .77, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000),
-                OptionContract('PUT', 'TEST_P105', 'test put 105', 105.00, 5.00, 5.05, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000)
+                OptionContract('CALL', 'TEST_C105', 'test call 105', 105.00, .75, .77, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000),
+                OptionContract('PUT', 'TEST_P105', 'test put 105', 105.00, 5.00, 5.05, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000)
             ),
             '110.00': (
-                OptionContract('CALL', 'TEST_C110', 'test call 110', 110.00, .25, .26, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000),
-                OptionContract('PUT', 'TEST_P110', 'test put 110', 110.00, 10.00, 10.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00.00"), int(datetime.now().timestamp())*1000)
+                OptionContract('CALL', 'TEST_C110', 'test call 110', 110.00, .25, .26, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000),
+                OptionContract('PUT', 'TEST_P110', 'test put 110', 110.00, 10.00, 10.01, '2X4', 10.00, .5, .25, .1, .9, .8, 100, True, False, datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+00:00"), int(datetime.now().timestamp())*1000)
             ),
         }
 

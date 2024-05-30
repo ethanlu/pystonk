@@ -21,7 +21,7 @@ class OptionContractTest(TestCase):
             "rho": 0.005,
             "open_interest": 5,
             "strike_price": 100,
-            "expiration_datetime": "2022-01-08T01:00:00+00:00",
+            "expiration_datetime": "2022-01-08T01:00:00.000+00:00",
             "last_trading_datetime": 1641690000000,
             "in_the_money": True,
             "non_standard": False
@@ -66,7 +66,7 @@ class OptionContractNaNTest(TestCase):
             "rho": "NaN",
             "open_interest": 5,
             "strike_price": 100,
-            "expiration_datetime": "2022-01-08T01:00:00+00:00",
+            "expiration_datetime": "2022-01-08T01:00:00.000+00:00",
             "last_trading_datetime": 1641690000000,
             "in_the_money": True,
             "non_standard": False
