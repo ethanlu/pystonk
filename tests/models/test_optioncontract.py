@@ -21,7 +21,7 @@ class OptionContractTest(TestCase):
             "rho": 0.005,
             "open_interest": 5,
             "strike_price": 100,
-            "expiration_datetime": 1641603600000,
+            "expiration_datetime": "2022-01-08T01:00:00+00:00",
             "last_trading_datetime": 1641690000000,
             "in_the_money": True,
             "non_standard": False
@@ -45,8 +45,9 @@ class OptionContractTest(TestCase):
         self.assertEqual(o.strike_price, 100.00, 'OptionContract did not normalize strike price')
         self.assertTrue(o.is_itm, 'OptionContract did not normalize ITM')
         self.assertFalse(o.is_nonstandard, 'OptionContract did not normalize non-standard')
-        self.assertEqual(o._expiration_datetime.timestamp(), 1641603600, 'OptionContract did not normalize expiration datetime')
-        self.assertEqual(o._last_trading_datetime.timestamp(), 1641690000, 'OptionContract did not normalize last trading datetime')
+        self.assertEqual(int(o._expiration_datetime.timestamp()), 1641603600, 'OptionContract did not normalize expiration datetime')
+        self.assertEqual(int(o._last_trading_datetime.timestamp()), 1641690000, 'OptionContract did not normalize last trading datetime')
+
 
 class OptionContractNaNTest(TestCase):
     def testOptionContractInstantiation(self):
@@ -65,7 +66,7 @@ class OptionContractNaNTest(TestCase):
             "rho": "NaN",
             "open_interest": 5,
             "strike_price": 100,
-            "expiration_datetime": 1641603600000,
+            "expiration_datetime": "2022-01-08T01:00:00+00:00",
             "last_trading_datetime": 1641690000000,
             "in_the_money": True,
             "non_standard": False

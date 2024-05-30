@@ -10,8 +10,7 @@ from unittest import TestCase
 
 class OptionsChainApiTest(TestCase):
     def setUp(self) -> None:
-        self._mock_optionschain_response = MagicMock()
-        self._mock_optionschain_response.json.return_value = {
+        self._mock_optionschain_response = {
             "callExpDateMap": {
                 "2020-01-03:1": {
                     "90.00": [
@@ -30,7 +29,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 90,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -52,7 +51,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 95,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -74,7 +73,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 100,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -96,7 +95,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 105,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -118,7 +117,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 110,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -144,7 +143,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 90,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -166,7 +165,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 95,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -188,7 +187,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 100,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": False,
                             "nonStandard": False
@@ -210,7 +209,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 105,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -232,7 +231,7 @@ class OptionsChainApiTest(TestCase):
                             "rho": 0,
                             "openInterest": 100,
                             "strikePrice": 110,
-                            "expirationDate": 1578013200000,
+                            "expirationDate": "2020-01-03T01:00:00+00:00",
                             "lastTradingDay": 1578099600000,
                             "inTheMoney": True,
                             "nonStandard": False
@@ -242,16 +241,19 @@ class OptionsChainApiTest(TestCase):
             }
         }
 
-    @patch('pystonk.api.OptionsChainApi.requests')
-    def testPriceHistory(self, requests_mock):
-        requests_mock.get.return_value = self._mock_optionschain_response
-        o = OptionsChainApi('some key')
+    @patch.object(OptionsChainApi, '_get')
+    @patch.object(OptionsChainApi, 'get_access_token')
+    def testPriceHistory(self, mock_get_access_token, mock_get):
+        mock_get.return_value = self._mock_optionschain_response
+        mock_get_access_token.return_value = "some token"
+        o = OptionsChainApi("some key", "some secret")
         r = o.get_single_option_chain(
-            symbol='test',
+            symbol="test",
             expire_date=date(2020, 1, 3)
         )
 
-        self.assertEqual(requests_mock.get.call_count, 1, "Mocked requests not called")
+        self.assertEqual(mock_get.call_count, 1, "_get method was not called")
+        self.assertEqual(mock_get_access_token.call_count, 1, "get_access_token method was not called")
         self.assertIsInstance(r, Dict, "OptionsChainApi did not return dict")
         self.assertEqual(5, len(r.keys()), "OptionsChainApi did not return expected number of options")
         self.assertListEqual(list(r.keys()), ['90.00', '95.00', '100.00', '105.00', '110.00'], "OptionsChainApi did not return expected strike price keys")
@@ -264,15 +266,18 @@ class OptionsChainApiTest(TestCase):
             self.assertEqual(v[1].contract_type, ContractType.PUT, f"OptionsChainApi did not return call OptionContract for strike price {k}")
             self.assertListEqual([v[0].strike_price, v[1].strike_price], [float(k), float(k)], f"OptionsChainApi did not return correct OptionContract strike price pairs for strike price {k}")
 
-    @patch('pystonk.api.OptionsChainApi.requests')
-    def testPriceHistoryInvalid(self, requests_mock):
-        requests_mock.get.return_value = self._mock_optionschain_response
-        o = OptionsChainApi('some key')
+    @patch.object(OptionsChainApi, '_get')
+    @patch.object(OptionsChainApi, 'get_access_token')
+    def testPriceHistoryInvalid(self, mock_get_access_token, mock_get):
+        mock_get.return_value = self._mock_optionschain_response
+        mock_get_access_token.return_value = "some token"
+        o = OptionsChainApi("some key", "some secret")
         r = o.get_single_option_chain(
-            symbol='test',
+            symbol="test",
             expire_date=date(2020, 1, 1)
         )
 
-        self.assertEqual(requests_mock.get.call_count, 1, "Mocked requests not called")
+        self.assertEqual(mock_get.call_count, 1, "_get method was not called")
+        self.assertEqual(mock_get_access_token.call_count, 1, "get_access_token method was not called")
         self.assertIsInstance(r, Dict, "OptionsChainApi did not return dict")
         self.assertEqual(0, len(r.keys()), "OptionsChainApi did not return expected number of options")

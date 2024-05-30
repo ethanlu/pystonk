@@ -9,9 +9,10 @@ from unittest import TestCase
 
 
 class PriceHistoryApiTest(TestCase):
-    def setUp(self) -> None:
-        self._mock_pricehistory_response = MagicMock()
-        self._mock_pricehistory_response.json.return_value = {
+    @patch.object(PriceHistoryApi, '_get')
+    @patch.object(PriceHistoryApi, 'get_access_token')
+    def testPriceHistory(self, mock_get_access_token, mock_get):
+        mock_get.return_value = {
             "candles": [
                 {
                   "open": 10.00,
@@ -49,39 +50,18 @@ class PriceHistoryApiTest(TestCase):
             "symbol": "TEST",
             "empty": False
         }
-
-    @patch('pystonk.api.PriceHistoryApi.requests')
-    def testPriceHistory(self, requests_mock):
-        requests_mock.get.return_value = self._mock_pricehistory_response
-        o = PriceHistoryApi('some key')
+        mock_get_access_token.return_value = "some token"
+        o = PriceHistoryApi("some key", "some secret")
         r = o.get_price_history(
-            symbol='test',
+            symbol="test",
             period_type=PeriodType.MONTH,
             period=1,
             frequency_type=FrequencyType.WEEKLY,
             frequency=1
         )
 
-        self.assertEqual(requests_mock.get.call_count, 1, "Mocked requests not called")
-        self.assertIsInstance(r, List, "PriceHistoryApi did not return list")
-        self.assertEqual(4, len(r), "PriceHistoryApi did not return expected number of items")
-        for k, v in enumerate(r):
-            self.assertIsInstance(v, CandleStick, f"PriceHistoryApi did not return CandleStick for item {k}")
-
-    @patch('pystonk.api.PriceHistoryApi.requests')
-    def testPriceHistoryWithDateRange(self, requests_mock):
-        requests_mock.get.return_value = self._mock_pricehistory_response
-        o = PriceHistoryApi('some key')
-        r = o.get_price_history_with_date_range(
-            symbol='test',
-            start=datetime.strptime('2020-01-01', '%Y-%m-%d'),
-            end=datetime.strptime('2020-02-01', '%Y-%m-%d'),
-            period_type=PeriodType.MONTH,
-            frequency_type=FrequencyType.WEEKLY,
-            frequency=1
-        )
-
-        self.assertEqual(requests_mock.get.call_count, 1, "Mocked requests not called")
+        self.assertEqual(mock_get.call_count, 1, "_get method was not called")
+        self.assertEqual(mock_get_access_token.call_count, 1, "get_access_token method was not called")
         self.assertIsInstance(r, List, "PriceHistoryApi did not return list")
         self.assertEqual(4, len(r), "PriceHistoryApi did not return expected number of items")
         for k, v in enumerate(r):
