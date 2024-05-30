@@ -4,6 +4,10 @@ from datetime import datetime
 from typing import Any
 
 
+def normalize_nan(input: Any) -> float:
+    return round(input, 2) if input != 'NaN' else 0.0
+
+
 class OptionContract(object):
     def __init__(self,
                  put_call: str,
@@ -22,12 +26,9 @@ class OptionContract(object):
                  open_interest: int,
                  in_the_money: bool,
                  non_standard: bool,
-                 expiration_datetime: int,
+                 expiration_datetime: str,
                  last_trading_datetime: int
     ):
-        def normalizeNaNFloat(input: Any) -> float:
-            return round(input, 2) if input != 'NaN' else 0.0
-
         self._contract_type = ContractType.CALL if put_call == ContractType.CALL.value else ContractType.PUT
         self._symbol = symbol.upper()
         self._description = description
@@ -35,16 +36,16 @@ class OptionContract(object):
         self._bid = round(bid, 2)
         self._ask = round(ask, 2)
         self._bid_ask_size = tuple(map(lambda x: int(x), bid_ask_size.split('X')))
-        self._volatility = normalizeNaNFloat(volatility)
-        self._delta = normalizeNaNFloat(delta)
-        self._gamma = normalizeNaNFloat(gamma)
-        self._theta = normalizeNaNFloat(theta)
-        self._vega = normalizeNaNFloat(vega)
-        self._rho = normalizeNaNFloat(rho)
+        self._volatility = normalize_nan(volatility)
+        self._delta = normalize_nan(delta)
+        self._gamma = normalize_nan(gamma)
+        self._theta = normalize_nan(theta)
+        self._vega = normalize_nan(vega)
+        self._rho = normalize_nan(rho)
         self._open_interest = open_interest
         self._in_the_money = in_the_money
         self._non_standard = non_standard
-        self._expiration_datetime = datetime.fromtimestamp(expiration_datetime / 1000)
+        self._expiration_datetime = datetime.strptime(expiration_datetime.split('T')[0], "%Y-%m-%d")
         self._last_trading_datetime = datetime.fromtimestamp(last_trading_datetime / 1000)
 
     @property
