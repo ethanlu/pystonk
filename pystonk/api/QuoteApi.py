@@ -4,44 +4,37 @@ from pystonk.utils import coalesce
 
 from typing import Optional
 
-import requests
-
 
 class QuoteApi(Api):
-    ENDPOINT = "https://api.tdameritrade.com/v1/marketdata/{symbol}/quotes"
+    ENDPOINT = "https://api.schwabapi.com/marketdata/v1/{symbol}/quotes"
 
-    def __init__(self, api_key: str):
-        super().__init__(api_key)
+    def __init__(self, app_key: str, app_secret: str):
+        super().__init__(app_key, app_secret)
 
     def get_quote(self, symbol: str) -> Optional[Quote]:
         symbol = symbol.upper()
-        params = {
-            'apikey': self._api_key,
-        }
-        self.logger.debug(f"getting quote for {symbol} with params : {params}")
-        response = requests.get(
+        self.logger.debug(f"getting quote for {symbol}")
+        data = self._get(
             self.ENDPOINT.format(symbol=symbol),
-            params=params
+            params={'fields': 'quote,reference'},
+            headers={'Authorization': f"Bearer {self.get_access_token()}"}
         )
-        self.logger.debug(f"request : {response.url}")
-        self.logger.debug(f"response : {response.status_code}")
 
-        data = response.json()
-
-        if data and data[symbol]:
+        if data and data[symbol] and data[symbol]['quote']:
             return Quote(
                 symbol=symbol,
-                price=coalesce(data[symbol], ('mark', 'openPrice', 'closePrice')),
-                last_price=coalesce(data[symbol], ('lastPrice', 'lastPriceInDouble', 'closePrice')),
-                high_price=coalesce(data[symbol], ('highPrice', 'highPriceInDouble', '52WkHigh')),
-                low_price=coalesce(data[symbol], ('lowPrice', 'lowPriceInDouble', '52WkLow')),
-                high_price_52=coalesce(data[symbol], ('52WkHigh', '52WkHighInDouble', 'highPrice', 'highPriceInDouble')),
-                low_price_52=coalesce(data[symbol], ('52WkLow', '52WkLowInDouble', 'lowPrice', 'lowPriceInDouble')),
-                bid=coalesce(data[symbol], ('bidPrice', 'bidPriceInDouble', 'lastPrice', 'closePrice')),
-                ask=coalesce(data[symbol], ('askPrice', 'askPriceInDouble', 'lastPrice', 'closePrice')),
-                bid_size=coalesce(data[symbol], ('bidSize', )),
-                ask_size=coalesce(data[symbol], ('askSize', )),
-                volume=coalesce(data[symbol], ('totalVolume', ))
+                price=coalesce(data[symbol]['quote'], ('mark', 'openPrice', 'closePrice')),
+                last_price=coalesce(data[symbol]['quote'], ('lastPrice', 'openPrice', 'closePrice')),
+                high_price=coalesce(data[symbol]['quote'], ('highPrice', '52WkHigh')),
+                low_price=coalesce(data[symbol]['quote'], ('lowPrice', '52WkLow')),
+                high_price_52=coalesce(data[symbol]['quote'], ('52WkHigh', 'highPrice')),
+                low_price_52=coalesce(data[symbol]['quote'], ('52WkLow', 'lowPrice')),
+                bid=coalesce(data[symbol]['quote'], ('bidPrice', 'lastPrice', 'closePrice')),
+                ask=coalesce(data[symbol]['quote'], ('askPrice', 'lastPrice', 'closePrice')),
+                bid_size=coalesce(data[symbol]['quote'], ('bidSize', )),
+                ask_size=coalesce(data[symbol]['quote'], ('askSize', )),
+                volume=coalesce(data[symbol]['quote'], ('totalVolume', ))
             )
 
+        self.logger.debug(f"symbol {symbol} was not found!")
         return None
