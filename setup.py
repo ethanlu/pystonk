@@ -19,13 +19,13 @@ def load_requirements():
         return [
             "boto3",
             "dependency-injector",
-            "numpy",
+            "numpy==1.24.1",
             "prettytable",
             "pyhocon",
             "quickchart.io",
             "requests",
-            "scipy",
-            "slack_bolt",
+            "scipy==1.10.0",
+            "slack_bolt==1.16.1",
             "termcolor",
             "wheel",
             "urllib3<2"
