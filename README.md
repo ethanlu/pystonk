@@ -11,11 +11,11 @@ trading stocks and options.
 * [TODO](#todo)
 
 ## Prerequisite
-This tool uses [TD Amertrade's API](https://developer.tdameritrade.com/apis) data:
-* [create an account](https://developer.tdameritrade.com/content/getting-started#createAccount)
-* [register an app](https://developer.tdameritrade.com/content/getting-started#registerApp) to get an API key.
+This tool uses [Schwab's API](https://developer.schwab.com/) market data:
+* [create an account](https://developer.schwab.com/register)
+* [register an app](https://developer.schwab.com/dashboard/apps/apps/add) to get key and secret
 
-For running this as a Slack app locally, it will need an Ngrok auth token:
+For running this as a Slack app locally, it will need a Ngrok auth token:
 * [create an account and get an auth token](https://ngrok.com/)
 
 ## Local Run
@@ -41,7 +41,8 @@ desired Slack workspace.
 ### Docker
 Create a `.env` file and add these environment variables to it:
 ```shell script
-PYSTONK_API_KEY={key from td ameritrade}
+PYSTONK_SCHWAB_KEY={app key from app created in schwab developer portal}
+PYSTONK_SCHWAB_SECRET={app secret from app created in schwab developer portal}
 PYSTONK_SLACK_TOKEN={slack bot user oauth token}
 PYSTONK_SLACK_SECRET={slack app signing secret}
 NGROK_AUTHTOKEN={ngrok auth token}
