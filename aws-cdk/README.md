@@ -35,6 +35,7 @@ $ aws configure --profile [profile-name]
 ```
 
 Update environment variables in `aws-cdk/pystonk-stack.py`.
+Update AWS account in `app.py`.
 
 To deploy the stack, run the following command.
 
