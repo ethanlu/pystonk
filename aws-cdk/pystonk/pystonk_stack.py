@@ -13,15 +13,18 @@ class PystonkStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         func = _lambda.Function(self, 'PystonkLambda',
-            runtime=_lambda.Runtime.PYTHON_3_9,
-            code=_lambda.Code.from_asset(path.join(path.dirname(__file__), "../source-code"),
+            runtime=_lambda.Runtime.PYTHON_3_11,
+            code=_lambda.Code.from_asset(path.join(path.dirname(__file__), "../../"),
                     bundling=BundlingOptions(
-                        image=_lambda.Runtime.PYTHON_3_9.bundling_image,
-                        command=["bash", "-c", "pip install -r ./pystonk/requirements.txt -t /asset-output && cp -au . /asset-output"
+                        image=_lambda.Runtime.PYTHON_3_11.bundling_image,
+                        command=["bash", "-c",
+                                 "python -m pip install . -t /asset-output && " +
+                                 "cp -au pystonk /asset-output && " +
+                                 "rm /asset-output/pystonk/conf/app.conf"
                         ]
                     )
                 ), 
-            handler='pystonk.slack_lambda_app.slack_receiver',
+            handler='pystonk.slack_app.start_lambda',
             architecture=_lambda.Architecture.ARM_64,
             environment={
                 "PYSTONK_SLACK_SECRET": "",
