@@ -5,7 +5,7 @@ from typing import List, Dict
 
 class View(ABC):
     SLACK_PAGINATE_CHAR_LIMIT = 2600
-    SLACK_OK_EMOJI = (':ro-yup:', ':ro-thumbsup:', ':perfect:', ':meme-yiss:')
+    SLACK_OK_EMOJI = (':kissing_heart:', ':ro-thumbup:', ':thumbsup:', ':+1:')
     SLACK_FAIL_EMOJI = (':ro-hmm:', ':ro-sob:', ':ro-omg:', ':ro-oops:', ':ro-pff:', ':ro-sorry:', ':ro-sweat:', ':ro-question:', ':ro-exclamation:', ':think-3d:', ':where:', ':poop-animated:', ':blob_think:')
     CHART_WIDTH = 600
     CHART_HEIGHT = 400
