@@ -31,28 +31,15 @@ def execute_command(text: str) -> Type[View]:
     return HelpView([c.help() for c in Container.available_commands()])
 
 
-def dispatch_response(ack: Callable, payload: Dict) -> None:
-    ack("one moment...")
-    slack_responder(payload, None)
-
-
 @app.event("app_mention")
 def receive_mention(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_response(
-        ack,
-        {
-            "f": "respond_mention",
-            "p": [event['text'], event['channel']]
-        }
-    )
+    ack("one moment...")
 
-
-def respond_mention(text: str, channel_id: str):
     try:
-        view = execute_command(text)
+        view = execute_command(event['text'])
 
         text_response = view.show_text()
         block_response = view.show()
@@ -61,7 +48,7 @@ def respond_mention(text: str, channel_id: str):
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
         slack_web_client.chat_postMessage(
-            channel=channel_id,
+            channel=event['channel'],
             blocks=block_response,
             text=text_response
         )
@@ -74,18 +61,10 @@ def receive_slash_command(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_response(
-        ack,
-        {
-            "f": "respond_slash_command",
-            "p": [body['text'], body['user_id'], body['channel_id']]
-        }
-    )
+    ack("one moment...")
 
-
-def respond_slash_command(text: str, user_id: str, channel_id: str):
     try:
-        view = execute_command(text)
+        view = execute_command(body['text'])
 
         text_response = view.show_text()
         block_response = view.show()
@@ -94,21 +73,13 @@ def respond_slash_command(text: str, user_id: str, channel_id: str):
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
         slack_web_client.chat_postEphemeral(
-            channel=channel_id,
-            user=user_id,
+            channel=body['channel_id'],
+            user=body['user_id'],
             blocks=block_response,
             text=text_response
         )
     except Exception as e:
         logger.exception(f"Unexpected error occurred...")
-
-
-def slack_responder(event, context):
-    logger.debug(event)
-    logger.debug(context)
-
-    f = globals()[event['f']]
-    f(*event['p'])
 
 
 def start():

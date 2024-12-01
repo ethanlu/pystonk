@@ -7,21 +7,22 @@ services:
     stdin_open: true
     tty: true
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
     env_file:
-      - .env
+      - ../.env
     entrypoint:
       - /bin/bash
       - docker/entrypoint.sh
     ports:
       - "3000:3000"
     volumes:
-      - "./pystonk:/opt/app/pystonk"
-      - "./tests:/opt/app/tests"
+      - ../setup.py:/opt/app/setup.py
+      - ../pystonk:/opt/app/pystonk
+      - ../tests:/opt/app/tests
   ngrok:
     image: ngrok/ngrok:alpine
     container_name: ngrok
     env_file:
-      - .env
+      - ../.env
     command: [ "http", "host.docker.internal:3000" ]
