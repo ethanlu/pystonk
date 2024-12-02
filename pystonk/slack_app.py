@@ -4,8 +4,9 @@ from pystonk.views import View
 from pystonk.views.HelpView import HelpView
 
 from slack_bolt import App
+from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from slack_sdk import WebClient
-from typing import Callable, Dict, Type
+from typing import Type
 
 import re
 
@@ -84,6 +85,12 @@ def receive_slash_command(ack, event, body):
 
 def start():
     app.start(port=int(Container.configuration()['slack']['port']))
+
+
+def start_lambda(event, context):
+    logger.debug(f"event : `{event}`")
+    logger.debug(f"context : `{context}`")
+    return SlackRequestHandler(app=app).handle(event, context)
 
 
 if __name__ == '__main__':
