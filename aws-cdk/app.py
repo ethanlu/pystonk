@@ -8,7 +8,7 @@ from os import path
 from pystonk.pystonk_stack import PystonkStack
 
 
-load_dotenv(path.abspath(path.dirname(__file__)) + "/../.env")
+load_dotenv(path.abspath(path.dirname(__file__)) + "/.env")
 app = cdk.App()
 PystonkStack(app, "PystonkStack",
     env=cdk.Environment(account=os.getenv('PYSTONK_AWS_ACCOUNT'), region=os.getenv('PYSTONK_AWS_REGION'))
