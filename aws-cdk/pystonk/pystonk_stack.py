@@ -1,3 +1,5 @@
+import os
+
 from aws_cdk import (
     BundlingOptions,
     Stack,
@@ -5,23 +7,11 @@ from aws_cdk import (
     aws_lambda as _lambda,
 )
 from constructs import Construct
-from pyhocon import ConfigFactory
 from os import path
+from dotenv import load_dotenv
 
 
-PYSTONK_ROOT = path.abspath(path.dirname(__file__)) + "/../../pystonk/"
-
-
-def get_conf_path(filename: str = 'app.conf') -> str:
-    filepath = path.join(PYSTONK_ROOT, 'conf', filename)
-    if path.exists(filepath):
-        return filepath
-    else:
-        return path.join(PYSTONK_ROOT, 'conf', 'default.conf')
-
-
-# TODO : introduce app-aws.conf?
-config = ConfigFactory.parse_file(get_conf_path("default.conf"))
+load_dotenv(path.abspath(path.dirname(__file__)) + "/../../")
 
 
 class PystonkStack(Stack):
@@ -44,11 +34,11 @@ class PystonkStack(Stack):
             handler='pystonk.slack_app.start_lambda',
             architecture=_lambda.Architecture.ARM_64,
             environment={
-                "PYSTONK_SLACK_SECRET": config['slack']['secret'],
-                "PYSTONK_SLACK_TOKEN": config['slack']['token'],
-                "PYSTONK_SCHWAB_KEY": config['app_key'],
-                "PYSTONK_SCHWAB_SECRET": config['app_secret'],
-                "PYSTONK_LOG_LEVEL": config['log']['loggers']['pystonk']['level']
+                "PYSTONK_SLACK_SECRET": os.getenv('PYSTONK_SLACK_SECRET'),
+                "PYSTONK_SLACK_TOKEN": os.getenv('PYSTONK_SLACK_TOKEN'),
+                "PYSTONK_SCHWAB_KEY": os.getenv('PYSTONK_SCHWAB_KEY'),
+                "PYSTONK_SCHWAB_SECRET": os.getenv('PYSTONK_SCHWAB_SECRET'),
+                "PYSTONK_LOG_LEVEL": os.getenv('PYSTONK_LOG_LEVEL')
             },
             timeout=Duration.seconds(5)
         )
