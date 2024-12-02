@@ -105,6 +105,8 @@ celerybeat.pid
 
 # Environments
 .env
+docker/.env
+aws-cdk/.env
 .venv
 env/
 venv/

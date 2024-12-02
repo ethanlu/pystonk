@@ -10,7 +10,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     env_file:
-      - ../.env
+      - .env
     entrypoint:
       - /bin/bash
       - docker/entrypoint.sh
@@ -24,5 +24,5 @@ services:
     image: ngrok/ngrok:alpine
     container_name: ngrok
     env_file:
-      - ../.env
+      - .env
     command: [ "http", "host.docker.internal:3000" ]
