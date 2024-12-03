@@ -12,6 +12,7 @@ trading stocks and options.
 * [Deployments](#deployments)
   * [Local Run](#local-run)
   * [AWS Lambda](#aws-lambda)
+* [Customizations](#customizations)
 * [TODO](#todo)
 
 ## Prerequisite
@@ -98,7 +99,17 @@ cdk synth
 # assumes aws profile is configured
 cdk --profile default deploy
 ```
-  
+
+## Customizations
+* The tool will respond to commands using an emoji selected randomly from a list for successful and failed commands. These can be customized as a space-delimited string of emoji labels separated into:
+  * `PYSTONK_SLACK_SUCCESS_EMOJIS`
+  * `PYSTONK_SLACK_FAIL_EMOJIS`
+```shell script
+# example
+PYSTONK_SLACK_SUCCESS_EMOJIS=":+1: :clap: :pray:"
+PYSTONK_SLACK_FAIL_EMOJIS=":middle-finger: :poop:"
+```
+
 ## TODO
 - More slack commands for helping with trades
 - Kivy desktop app
