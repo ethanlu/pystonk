@@ -1,59 +1,104 @@
 pystonk
 =======
 
-Python tool that leverages publically available stock data to do some simple calculations that I often perform when
+Python tool that leverages publicly available stock data to do some simple calculations that I often perform when
 trading stocks and options.
 
 # Table of Contents
 * [Prerequisite](#prerequisite)
-* [Local Run](#local-run)
-* [Slack App](#slack-app)
+  * Schwab Market Data API
+  * Slack Bot
+* [Environment Variables](#environment-variables)
+* [Deployments](#deployments)
+  * [Local Run](#local-run)
+  * [AWS Lambda](#aws-lambda)
 * [TODO](#todo)
 
 ## Prerequisite
-This tool uses [Schwab's API](https://developer.schwab.com/) market data:
-* [create an account](https://developer.schwab.com/register)
-* [register an app](https://developer.schwab.com/dashboard/apps/apps/add) to get key and secret
+This tool uses the following services:
+* [Schwab Market Data API](https://developer.schwab.com/products/trader-api--individual) : tool's calculations for trades are based on data provided by Schwab
+* [Slack Bot](https://api.slack.com/) : tool runs as a bot in a Slack workspace to allow easier sharing of its information and discussion with others
 
-For running this as a Slack app locally, it will need a Ngrok auth token:
-* [create an account and get an auth token](https://ngrok.com/)
+### Schwab Market Data API
+We will be leveraging Schwab's Market Data product to access stock and option information:
+* Create an account on their [Developer Portal](https://developer.schwab.com/)
+* Register an app to get a key and secret. These will need to be exported as `PYSTONK_SCHWAB_KEY` and `PYSTONK_SCHWAB_SECRET`
+  * The API Product we want to use is _Market Data Production_
+  * The callback URL will not be used in this tool, so just enter any valid URL
 
-## Local Run
-### Ngrok
-Setup a Ngrok access point so that traffic from Slack can reach your local app. The request URL that is needed for Slack events and 
-slash commands should use:
-`https://{ngrok endpoint}/slack/events`
+### Configure Slack Bot
+PyStonk runs as a [Slack application](https://api.slack.com/apps?new_app=1) in a workspace. Once the app is created:
+* In the _Basic Information_ page
+  * The [signing secret](https://api.slack.com/authentication/verifying-requests-from-slack) will need to be exported as `PYSTONK_SLACK_SECRET`
+* In the _OAuth & Permissions_ page
+  * In the _OAuth Tokens_ section, [create a bot oauth token](https://api.slack.com/legacy/oauth) and it will need to be exported as `PYSTONK_SLACK_TOKEN`:
+  * In the _Scopes_ section, the Bot Token Scopes will need the following scopes defined:
+    * `app_mention:read`
+    * `chat:write`
+    * `commands`
+* In the _Event Subscriptions_ page
+  * Enable events and set the request endpoint the server that will host the app (see deployments section)
+  * In the _Subscribe bot to events_ section, add `app_mention` as an event with `app_mention:read` scope
+* In _Slash Commands_ page 
+  * Create a `/pystonk` command (or whatever slack command you choose) and set the endpoint url to the server that will host the app (see deployments section)
 
-### Configure Slack App
-PyStonk can be setup as a Slack application! It is not distributed publicly, so will need to be manually installed into your
-desired Slack workspace.
-* [Create an app in desired workspace](https://api.slack.com/apps?new_app=1)
-  * Once created, a signing secret will be available and this will need to be exported as `PYSTONK_SLACK_SECRET`
-* [Create a bot oauth token and ](https://api.slack.com/legacy/oauth):
-  * Once created, the Bot User Oauth Token will be accessible in the Oauth & Permissions section of Slack app admin page. Export this token to `PYSTONK_SLACK_TOKEN`
-* In OAuth & Permissions section of your Slack app admin page, add the following bot token scopes:
-  * `app_mention:read`
-  * `chat:write`
-  * `commands`
-* In Event Subscriptions section of your Slack app admin page, enable events and set the request endpoint to your server that will host this project
-* In Slash Commands section of your Slack app admin page, create a `/pystonk` command and set the endpoint url to your server that will host this project
-
-### Docker
-Create a `.env` file and add these environment variables to it:
+## Environment Variables
+The tool will need these required environment variables defined in an `.env` file
 ```shell script
-PYSTONK_SCHWAB_KEY={app key from app created in schwab developer portal}
-PYSTONK_SCHWAB_SECRET={app secret from app created in schwab developer portal}
-PYSTONK_SLACK_TOKEN={slack bot user oauth token}
-PYSTONK_SLACK_SECRET={slack app signing secret}
-NGROK_AUTHTOKEN={ngrok auth token}
+PYSTONK_SCHWAB_KEY={key from schwab app}
+PYSTONK_SCHWAB_SECRET={secret from schwab app}
+PYSTONK_SLACK_SECRET={signing secret from slack app}
+PYSTONK_SLACK_TOKEN={bot oauth token from slack app}
+``` 
+Following are optional environment variables that can be set depending on deployment and needs:
+```shell script
+PYSTONK_LOG_LEVEL={amount of logs generated by app (for debugging purposes). defaults to ERROR}
+PYSTONK_AWS_ACCOUNT={aws account id when deployed as aws lambda}
+PYSTONK_AWS_REGION={aws region when deployed as aws lambda}
+NGROK_AUTHTOKEN={token needed to run ngrok when deployed locally}
 ```
 
-Build and run project
-```shell script
-docker-compose build
-docker-compose up -d
-```
+## Deployments
+Once Schwab API access and Slack application are all configured, this tool can be deployed to run locally on a machine or as an AWS Lambda service
 
+### Local Run
+This tool can run locally as a Docker image, but will rely on [Ngrok](https://ngrok.com) to act as an API gateway into the container:
+* Create an account to get an auth token. This will need to be exported as `NGROK_AUTHTOKEN`
+* Create an `.env` file in `docker` directory of this project and add the required and optional environment variables (see [Environment Variables](#environment-variables))
+* Build image and run
+  ```shell script
+  # go into docker folder
+  cd docker
+  
+  # assumes .env file exists
+  docker-compose build
+  docker-compse up -d
+  ```
+* Check [Ngrok dashboard](https://dashboard.ngrok.com/endpoints) to get the ingress endpoint needed to configure the Slack app
+  * For both _Events Subscription_ and _Slash Commands_ configurations, the endpoint will need to be suffixed with `/slack/events`
+  ```
+  example: https://some-id.ngrok-free.app/slack/events
+  ```
+
+### AWS Lambda
+This tool can also be deployed as an [AWS Lambda](https://aws.amazon.com/lambda/) service by leveraging [AWS CDK](https://aws.amazon.com/cdk/).
+* Create an `.env` file in `aws-cdk` directory of this project and add the required and optional environment variables (see [Environment Variables](#environment-variables))
+* Install AWS CDK CLI:
+```shell script
+cd aws-cdk
+
+# install the tool within a virtual environment to avoid polluting global environmentm
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# cdk commands are now installed and assumes .env file exists
+cdk synth
+
+# assumes aws profile is configured
+cdk --profile default deploy
+```
+  
 ## TODO
-- More reports & slack commands
+- More slack commands for helping with trades
 - Kivy desktop app
