@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.9
+FROM python:3.10-slim
 
 COPY . /opt/app
 WORKDIR /opt/app
@@ -7,6 +7,6 @@ WORKDIR /opt/app
 RUN rm -rf /opt/app/pystonk/conf/app.conf
 
 RUN pip install --no-cache-dir --upgrade pip \
-    && python setup.py develop
+    && python -m pip install --editable .[tests]
 
-CMD [ "pystonk.slack_app.slack_lambda_receiver" ]
+CMD [ "pystonk.slack_app.start" ]

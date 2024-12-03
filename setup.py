@@ -1,39 +1,13 @@
 from setuptools import setup, find_packages
 
-import os
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 
-def load_requirements():
-    if os.getenv('PYSTONK_LAMBDA_DEPLOY'):
-        # only used for deploying first lambda function to aws (for production)
-        return [
-            "boto3",
-            "pyhocon",
-            "slack_bolt"
-        ]
-    else:
-        #  used for all other situations
-        return [
-            "boto3",
-            "dependency-injector",
-            "numpy==1.24.1",
-            "prettytable",
-            "pyhocon",
-            "quickchart.io",
-            "requests",
-            "scipy==1.10.0",
-            "slack_bolt==1.16.1",
-            "termcolor",
-            "wheel",
-            "urllib3<2"
-        ]
-
 setup(
     name="pystonk",
-    version="2.0.0",
+    version="2.1.1",
     author="Ethan Lu",
     author_email="fang.lu@gmail.com",
     description="Python Stocks & Options Tool",
@@ -46,18 +20,32 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3'
     ],
-    python_requires='>3.6',
+    python_requires='>=3.10',
     packages=find_packages(),
     package_data={'pystonk': ['conf/*.conf']},
-    install_requires=load_requirements(),
-    tests_require=[
-        "coverage",
-        "mock"
+    install_requires=[
+        "boto3",
+        "numpy",
+        "prettytable",
+        "pyhocon",
+        "quickchart.io",
+        "requests",
+        "scipy",
+        "slack_bolt",
+        "termcolor",
+        "wheel",
+        "urllib3"
     ],
+    extras_require={
+        "tests": [
+            "coverage",
+            "mock",
+            "pytest"
+        ],
+    },
     entry_points={
         'console_scripts': [
-            'pystonk_terminal = pystonk.terminal_app:terminal',
-            'pystonk_slack = pystonk.slack_app:start',
+            'pystonk = pystonk.slack_app:start',
         ]
     }
 )

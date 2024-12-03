@@ -1,39 +1,53 @@
-from pystonk.di import Container
+from pystonk import configuration
+from pystonk.api.OptionsChainApi import OptionsChainApi
+from pystonk.api.PriceHistoryApi import PriceHistoryApi
+from pystonk.api.QuoteApi import QuoteApi
+from pystonk.commands.PriceCheckCommand import PriceCheckCommand
+from pystonk.commands.PriceHistoryCommand import PriceHistoryCommand
+from pystonk.commands.OptionsChainCommand import OptionsChainCommand
 from pystonk.utils.LoggerMixin import getLogger
 from pystonk.views import View
 from pystonk.views.HelpView import HelpView
 
 from slack_bolt import App
+from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from slack_sdk import WebClient
-from typing import Callable, Dict, Type
+from typing import Type
 
 import re
 
 logger = getLogger('pystonk')
-app = App(
-    token=Container.configuration()['slack']['token'],
-    signing_secret=Container.configuration()['slack']['secret'],
-    logger=logger,
-    process_before_response=Container.configuration()['slack']['lambda']
+
+apis = {
+    'quote': QuoteApi(configuration['app_key'], configuration['app_secret']),
+    'price_history': PriceHistoryApi(configuration['app_key'], configuration['app_secret']),
+    'options_chain': OptionsChainApi(configuration['app_key'], configuration['app_secret'])
+}
+commands = (
+    PriceCheckCommand(apis['quote']),
+    PriceHistoryCommand(apis['quote'], apis['price_history']),
+    OptionsChainCommand(apis['quote'], apis['options_chain'])
 )
-slack_web_client = WebClient(token=Container.configuration()['slack']['token'])
+
+app = App(
+    token=configuration['slack']['token'],
+    signing_secret=configuration['slack']['secret'],
+    logger=logger,
+    process_before_response=configuration['slack']['lambda']
+)
+slack_web_client = WebClient(token=configuration['slack']['token'])
 
 
 def execute_command(text: str) -> Type[View]:
     text = re.sub(r"<.*>", '', text).strip()
     logger.debug(f"matching command for text : {text}")
-    for command in Container.available_commands():
+    for command in commands:
         if command.command_regex.search(text):
             logger.debug(f"selected command : {command.__class__.__name__}")
             return command.execute(text)
 
     logger.debug(f"no command match...")
-    return HelpView([c.help() for c in Container.available_commands()])
-
-
-def dispatch_response(ack: Callable, payload: Dict) -> None:
-    ack("one moment...")
-    slack_responder(payload, None)
+    return HelpView([c.help() for c in commands])
 
 
 @app.event("app_mention")
@@ -41,18 +55,10 @@ def receive_mention(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_response(
-        ack,
-        {
-            "f": "respond_mention",
-            "p": [event['text'], event['channel']]
-        }
-    )
+    ack("one moment...")
 
-
-def respond_mention(text: str, channel_id: str):
     try:
-        view = execute_command(text)
+        view = execute_command(event['text'])
 
         text_response = view.show_text()
         block_response = view.show()
@@ -61,7 +67,7 @@ def respond_mention(text: str, channel_id: str):
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
         slack_web_client.chat_postMessage(
-            channel=channel_id,
+            channel=event['channel'],
             blocks=block_response,
             text=text_response
         )
@@ -74,18 +80,10 @@ def receive_slash_command(ack, event, body):
     logger.debug(f"event : `{event}`")
     logger.debug(f"body : `{body}`")
 
-    dispatch_response(
-        ack,
-        {
-            "f": "respond_slash_command",
-            "p": [body['text'], body['user_id'], body['channel_id']]
-        }
-    )
+    ack("one moment...")
 
-
-def respond_slash_command(text: str, user_id: str, channel_id: str):
     try:
-        view = execute_command(text)
+        view = execute_command(body['text'])
 
         text_response = view.show_text()
         block_response = view.show()
@@ -94,8 +92,8 @@ def respond_slash_command(text: str, user_id: str, channel_id: str):
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
         slack_web_client.chat_postEphemeral(
-            channel=channel_id,
-            user=user_id,
+            channel=body['channel_id'],
+            user=body['user_id'],
             blocks=block_response,
             text=text_response
         )
@@ -103,16 +101,14 @@ def respond_slash_command(text: str, user_id: str, channel_id: str):
         logger.exception(f"Unexpected error occurred...")
 
 
-def slack_responder(event, context):
-    logger.debug(event)
-    logger.debug(context)
-
-    f = globals()[event['f']]
-    f(*event['p'])
-
-
 def start():
-    app.start(port=int(Container.configuration()['slack']['port']))
+    app.start(port=int(configuration['slack']['port']))
+
+
+def start_lambda(event, context):
+    logger.debug(f"event : `{event}`")
+    logger.debug(f"context : `{context}`")
+    return SlackRequestHandler(app=app).handle(event, context)
 
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+from pystonk import configuration
 from abc import ABC, abstractmethod
 from prettytable import PrettyTable
 from typing import List, Dict
@@ -5,8 +6,8 @@ from typing import List, Dict
 
 class View(ABC):
     SLACK_PAGINATE_CHAR_LIMIT = 2600
-    SLACK_OK_EMOJI = (':kissing_heart:', ':ro-thumbup:', ':thumbsup:', ':+1:')
-    SLACK_FAIL_EMOJI = (':ro-hmm:', ':ro-sob:', ':ro-omg:', ':ro-oops:', ':ro-pff:', ':ro-sorry:', ':ro-sweat:', ':ro-question:', ':ro-exclamation:', ':think-3d:', ':where:', ':poop-animated:', ':blob_think:')
+    SLACK_OK_EMOJI = configuration['slack']['emojis']['success'].split(' ')
+    SLACK_FAIL_EMOJI = configuration['slack']['emojis']['fail'].split(' ')
     CHART_WIDTH = 600
     CHART_HEIGHT = 400
     CHAR_PIXEL_RATIO = 2

@@ -1,8 +1,13 @@
+import requests
+
 from pystonk.api.QuoteApi import QuoteApi
 from pystonk.models.Quote import Quote
 
+from mock import MagicMock, patch
+from pytest import mark
+from requests import HTTPError
 from unittest import TestCase
-from mock import patch
+
 
 
 class QuoteApiTest(TestCase):
@@ -45,8 +50,10 @@ class QuoteApiTest(TestCase):
 
     @patch.object(QuoteApi, '_get')
     @patch.object(QuoteApi, 'get_access_token')
-    def testQuoteEmpty(self, mock_get_access_token, mock_get):
-        mock_get.return_value = {}
+    def testQuoteInvalid(self, mock_get_access_token, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 400
+        mock_get.side_effect = HTTPError(400, response=mock_response)
         mock_get_access_token = "some token"
 
         o = QuoteApi('some key', 'some secret')
@@ -54,3 +61,16 @@ class QuoteApiTest(TestCase):
 
         self.assertEqual(mock_get.call_count, 1, "_get method was not called")
         self.assertIsNone(q, "QuoteApi did not return expected empty")
+
+    @patch.object(QuoteApi, '_get')
+    @patch.object(QuoteApi, 'get_access_token')
+    def testQuoteFail(self, mock_get_access_token, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 500
+        mock_get.side_effect = HTTPError(500, response=mock_response)
+        mock_get_access_token = "some token"
+
+        with self.assertRaises(HTTPError):
+            o = QuoteApi('some key', 'some secret')
+            o.get_quote(symbol='TEST')
+        self.assertTrue("QuoteApi did not throw expected error")
