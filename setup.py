@@ -25,7 +25,6 @@ setup(
     package_data={'pystonk': ['conf/*.conf']},
     install_requires=[
         "boto3",
-        "dependency-injector",
         "numpy",
         "prettytable",
         "pyhocon",

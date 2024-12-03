@@ -1,11 +1,7 @@
-from pystonk import get_conf_path
-
-from logging import config, getLogger, Logger
-from pyhocon import ConfigFactory
-
-config.dictConfig(ConfigFactory.parse_file(get_conf_path())['log'])
+from pystonk import logger
+from logging import getLogger, Logger
 
 class LoggerMixin(object):
     @property
     def logger(self) -> Logger:
-        return getLogger('pystonk')
+        return logger
