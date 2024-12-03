@@ -9,6 +9,7 @@ from pystonk.utils.LoggerMixin import getLogger
 from pystonk.views import View
 from pystonk.views.HelpView import HelpView
 
+from random import choice
 from slack_bolt import App
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from slack_sdk import WebClient
@@ -27,6 +28,17 @@ commands = (
     PriceCheckCommand(apis['quote']),
     PriceHistoryCommand(apis['quote'], apis['price_history']),
     OptionsChainCommand(apis['quote'], apis['options_chain'])
+)
+
+acknowledgements = (
+    "Absolutely!", "Acknowledged HQ.", "Affirmative, sir!", "Affirmative.", "All right!", "As you will.", "Commencing!", "Commencing.", "Confirmed.",
+    "Delighted to, sir!", "Excellent!", "Excellent.", "Haha! At last!", "Honor guide me!", "I copy that.", "I dig.", "I hear that.", "I'm all over it.",
+    "I'm goin!", "I'm gone.", "I'm on the job.", "Immediately!", "In the pipe, five by five.", "In transit HQ.", "Initiating.", "It shall be done.",
+    "It will be done.", "It's show time!", "Let's roll.", "Locus acknowledged.", "Make it happen.", "Move it!", "My path is set.", "Naturally.",
+    "Navcom locked.", "No problem.", "No sweat!", "Of course, mein Herr!", "Of course.", "Oh, is that it?", "On my way!", "Orders received.",
+    "Outstanding!", "Perfect!", "Proceedin'", "Right away, sir.", "Right away.", "Rock and roll", "Roger that.", "Roger.", "Set a course.", "Slammin'!",
+    "So be it.", "Stat!", "Sure thing!", "Target designated.", "Thus I serve!", "Vector locked in.", "Very well.", "We move.", "Yeah, I'm goin'!",
+    "Yep!", "You got it.", "You think as I do."
 )
 
 app = App(
@@ -50,12 +62,8 @@ def execute_command(text: str) -> Type[View]:
     return HelpView([c.help() for c in commands])
 
 
-@app.event("app_mention")
-def receive_mention(ack, event, body):
+def mention(event):
     logger.debug(f"event : `{event}`")
-    logger.debug(f"body : `{body}`")
-
-    ack("one moment...")
 
     try:
         view = execute_command(event['text'])
@@ -75,12 +83,8 @@ def receive_mention(ack, event, body):
         logger.exception(f"Unexpected error occurred...")
 
 
-@app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))
-def receive_slash_command(ack, event, body):
-    logger.debug(f"event : `{event}`")
+def slash_command(body):
     logger.debug(f"body : `{body}`")
-
-    ack("one moment...")
 
     try:
         view = execute_command(body['text'])
@@ -99,6 +103,15 @@ def receive_slash_command(ack, event, body):
         )
     except Exception as e:
         logger.exception(f"Unexpected error occurred...")
+
+
+def acknowledge(body, ack):
+    logger.debug(f"received : `{body}`")
+    ack(choice(acknowledgements))
+
+
+app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))(ack=acknowledge, lazy=[slash_command])
+app.event("app_mention")(ack=acknowledge, lazy=[mention])
 
 
 def start():
