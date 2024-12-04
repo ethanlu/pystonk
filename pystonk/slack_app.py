@@ -9,6 +9,7 @@ from pystonk.lambda_receiver import acknowledgements
 from pystonk.views import View
 from pystonk.views.HelpView import HelpView
 
+from functools import partial
 from random import choice
 from slack_bolt import App
 from slack_sdk import WebClient
@@ -93,13 +94,29 @@ def slash_command(body):
         logger.exception(f"Unexpected error occurred...")
 
 
-def acknowledge(body, ack):
+def acknowledge(body, ack, send_message=False):
     logger.debug(f"received : `{body}`")
-    ack(choice(acknowledgements))
+    text = choice(acknowledgements)
+    ack(text)
+
+    if send_message:
+        client.chat_postMessage(
+            channel=body['event']['channel'],
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": text
+                    }
+                }
+            ],
+            text=text
+        )
 
 
 app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))(ack=acknowledge, lazy=[slash_command])
-app.event("app_mention")(ack=acknowledge, lazy=[mention])
+app.event("app_mention")(ack=partial(acknowledge, send_message=True), lazy=[mention])
 
 
 def start():
