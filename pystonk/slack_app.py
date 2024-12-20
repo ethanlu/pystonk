@@ -1,22 +1,22 @@
-from pystonk import configuration
+from pystonk import configuration, logger
 from pystonk.api.OptionsChainApi import OptionsChainApi
 from pystonk.api.PriceHistoryApi import PriceHistoryApi
 from pystonk.api.QuoteApi import QuoteApi
 from pystonk.commands.PriceCheckCommand import PriceCheckCommand
 from pystonk.commands.PriceHistoryCommand import PriceHistoryCommand
 from pystonk.commands.OptionsChainCommand import OptionsChainCommand
-from pystonk.utils.LoggerMixin import getLogger
+from pystonk.lambda_receiver import acknowledgements
 from pystonk.views import View
 from pystonk.views.HelpView import HelpView
 
+from functools import partial
+from random import choice
 from slack_bolt import App
-from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 from slack_sdk import WebClient
 from typing import Type
 
 import re
 
-logger = getLogger('pystonk')
 
 apis = {
     'quote': QuoteApi(configuration['app_key'], configuration['app_secret']),
@@ -29,13 +29,14 @@ commands = (
     OptionsChainCommand(apis['quote'], apis['options_chain'])
 )
 
+
 app = App(
     token=configuration['slack']['token'],
     signing_secret=configuration['slack']['secret'],
     logger=logger,
     process_before_response=configuration['slack']['lambda']
 )
-slack_web_client = WebClient(token=configuration['slack']['token'])
+client = WebClient(token=configuration['slack']['token'])
 
 
 def execute_command(text: str) -> Type[View]:
@@ -50,12 +51,8 @@ def execute_command(text: str) -> Type[View]:
     return HelpView([c.help() for c in commands])
 
 
-@app.event("app_mention")
-def receive_mention(ack, event, body):
+def mention(event):
     logger.debug(f"event : `{event}`")
-    logger.debug(f"body : `{body}`")
-
-    ack("one moment...")
 
     try:
         view = execute_command(event['text'])
@@ -66,7 +63,7 @@ def receive_mention(ack, event, body):
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
-        slack_web_client.chat_postMessage(
+        client.chat_postMessage(
             channel=event['channel'],
             blocks=block_response,
             text=text_response
@@ -75,12 +72,8 @@ def receive_mention(ack, event, body):
         logger.exception(f"Unexpected error occurred...")
 
 
-@app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))
-def receive_slash_command(ack, event, body):
-    logger.debug(f"event : `{event}`")
+def slash_command(body):
     logger.debug(f"body : `{body}`")
-
-    ack("one moment...")
 
     try:
         view = execute_command(body['text'])
@@ -91,7 +84,7 @@ def receive_slash_command(ack, event, body):
         logger.debug(f"block : {block_response}")
         logger.debug(f"block length : {len(str(block_response))}")
         logger.debug(f"text : {len(text_response)}")
-        slack_web_client.chat_postEphemeral(
+        client.chat_postEphemeral(
             channel=body['channel_id'],
             user=body['user_id'],
             blocks=block_response,
@@ -101,15 +94,31 @@ def receive_slash_command(ack, event, body):
         logger.exception(f"Unexpected error occurred...")
 
 
+def acknowledge(body, ack, send_message=False):
+    logger.debug(f"received : `{body}`")
+    text = choice(acknowledgements)
+    ack(text)
+
+    if send_message:
+        client.chat_postMessage(
+            channel=body['event']['channel'],
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": text
+                    }
+                }
+            ],
+            text=text
+        )
+
+
+app.command(re.compile(r"^/pystonk(-dev)?$", re.IGNORECASE | re.ASCII))(ack=acknowledge, lazy=[slash_command])
+app.event("app_mention")(ack=partial(acknowledge, send_message=True), lazy=[mention])
+
+
 def start():
     app.start(port=int(configuration['slack']['port']))
 
-
-def start_lambda(event, context):
-    logger.debug(f"event : `{event}`")
-    logger.debug(f"context : `{context}`")
-    return SlackRequestHandler(app=app).handle(event, context)
-
-
-if __name__ == '__main__':
-    start()
