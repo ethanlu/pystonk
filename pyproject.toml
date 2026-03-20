@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pystonk"
+version = "2.2.0"
+description = "Python Stocks & Options Tool"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "Ethan Lu", email = "fang.lu@gmail.com" }
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3"
+]
+dependencies = [
+  "boto3",
+  "fastapi",
+  "jinja2",
+  "numpy",
+  "prettytable",
+  "pyhocon",
+  "python-multipart",
+  "quickchart.io",
+  "requests",
+  "scipy",
+  "slack_bolt",
+  "termcolor",
+  "urllib3",
+  "uvicorn",
+  "wheel"
+]
+
+[project.optional-dependencies]
+tests = [
+  "coverage",
+  "httpx",
+  "mock",
+  "pytest"
+]
+
+[project.scripts]
+pystonk = "pystonk.slack_app:start"
+pystonk-web = "pystonk.web_app:start"
+
+[tool.setuptools]
+packages = { find = {} }
+
+[tool.setuptools.package-data]
+pystonk = ["conf/*.conf", "web/templates/*.html"]
+
+[tool.uv]
+package = true

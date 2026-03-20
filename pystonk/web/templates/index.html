@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PyStonk Web</title>
+    <style>
+      :root {
+        --sand: #efe6d6;
+        --bone: #faf6ee;
+        --ink: #1f2529;
+        --ink-soft: #5e6a72;
+        --teal: #0e6d64;
+        --teal-soft: rgba(14, 109, 100, 0.12);
+        --rust: #b65430;
+        --rust-soft: rgba(182, 84, 48, 0.12);
+        --line: rgba(31, 37, 41, 0.14);
+        --shadow: 0 22px 60px rgba(31, 37, 41, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        background:
+          radial-gradient(circle at 10% 20%, rgba(182, 84, 48, 0.12), transparent 24%),
+          radial-gradient(circle at 85% 10%, rgba(14, 109, 100, 0.18), transparent 20%),
+          linear-gradient(180deg, #fcf9f3 0%, var(--sand) 100%);
+        min-height: 100vh;
+      }
+
+      main {
+        width: min(1160px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 36px 0 56px;
+      }
+
+      .hero,
+      .workspace-grid,
+      .grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .hero {
+        grid-template-columns: 1.3fr 0.9fr;
+        margin-bottom: 18px;
+      }
+
+      .workspace-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin: 18px 0;
+      }
+
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .panel {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-copy,
+      .launch,
+      .list-card,
+      .feature-card,
+      .meta-card {
+        padding: 26px;
+      }
+
+      .eyebrow,
+      .kicker {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        background: var(--teal-soft);
+        color: var(--teal);
+      }
+
+      .kicker {
+        margin-bottom: 10px;
+        background: var(--rust-soft);
+        color: var(--rust);
+      }
+
+      h1 {
+        margin: 16px 0 12px;
+        font-size: clamp(42px, 6vw, 72px);
+        line-height: 0.92;
+      }
+
+      h2,
+      h3 {
+        margin: 0 0 10px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--ink-soft);
+        line-height: 1.6;
+      }
+
+      .hero-copy p {
+        max-width: 58ch;
+        font-size: 17px;
+      }
+
+      .section-copy {
+        margin-bottom: 16px;
+      }
+
+      .message {
+        margin-bottom: 18px;
+        padding: 16px 18px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+      }
+
+      .message.notice {
+        background: var(--teal-soft);
+        color: var(--teal);
+      }
+
+      .message.error {
+        background: var(--rust-soft);
+        color: var(--rust);
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--ink-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 13px;
+      }
+
+      input,
+      button {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        font: inherit;
+      }
+
+      input {
+        padding: 14px 15px;
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      button,
+      .pill-link {
+        padding: 14px 16px;
+        color: white;
+        background: linear-gradient(135deg, var(--ink) 0%, #32404a 100%);
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+      }
+
+      .entry-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .entry {
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(31, 37, 41, 0.04);
+        border: 1px solid var(--line);
+      }
+
+      .entry-header,
+      .entry-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .entry-header {
+        margin-bottom: 8px;
+      }
+
+      .entry strong {
+        font-size: 18px;
+      }
+
+      .entry small {
+        color: var(--ink-soft);
+      }
+
+      .mini-form {
+        display: inline-grid;
+      }
+
+      .mini-form button {
+        width: auto;
+        padding: 10px 12px;
+        border-radius: 12px;
+      }
+
+      .muted {
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(31, 37, 41, 0.04);
+        border: 1px dashed var(--line);
+      }
+
+      code {
+        font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 0.92em;
+      }
+
+      @media (max-width: 940px) {
+        .hero,
+        .workspace-grid,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      {% if workspace_notice %}
+      <section class="message notice panel">{{ workspace_notice }}</section>
+      {% endif %}
+
+      {% if workspace_error %}
+      <section class="message error panel">{{ workspace_error }}</section>
+      {% endif %}
+
+      <section class="hero">
+        <article class="panel hero-copy">
+          <span class="eyebrow">Single-User Trade Desk</span>
+          <h1>Weekly setup workflow, now in the browser.</h1>
+          <p>
+            PyStonk is shifting from a Slack bot into a personal web workspace. The goal is the same:
+            check the underlying, pressure-test the move history, and surface option candidates without
+            leaving the trading loop.
+          </p>
+        </article>
+
+        <aside class="panel launch">
+          <h2>Open a symbol dashboard</h2>
+          <p class="section-copy">Start with a ticker, then tune the history and option filters on the next page.</p>
+          <form action="/symbol" method="get">
+            <label>
+              Symbol
+              <input name="symbol" value="SPY" required />
+            </label>
+            <button type="submit">Launch Dashboard</button>
+          </form>
+        </aside>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel list-card">
+          <span class="kicker">Watchlist</span>
+          <h3>Saved symbols</h3>
+          <p class="section-copy">Keep a short list of names you revisit for weekly puts, rolls, or covered calls.</p>
+
+          {% if watchlist %}
+          <div class="entry-list">
+            {% for entry in watchlist %}
+            <div class="entry">
+              <div class="entry-header">
+                <strong>{{ entry.symbol }}</strong>
+                <a class="pill-link" href="{{ entry.url }}">Open</a>
+              </div>
+              <p>{{ entry.note if entry.note else "No desk note saved yet." }}</p>
+              <div class="entry-actions" style="margin-top: 12px;">
+                <small>Added {{ entry.created_at }}</small>
+                <form class="mini-form" action="/watchlist/remove" method="post">
+                  <input type="hidden" name="symbol" value="{{ entry.symbol }}" />
+                  <input type="hidden" name="redirect_to" value="/" />
+                  <button type="submit">Remove</button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="muted">No watchlist symbols saved yet. Add them from a symbol dashboard.</div>
+          {% endif %}
+        </article>
+
+        <article class="panel list-card">
+          <span class="kicker">Presets</span>
+          <h3>Saved setup defaults</h3>
+          <p class="section-copy">Presets preserve the history and option filters you want to revisit quickly.</p>
+
+          {% if presets %}
+          <div class="entry-list">
+            {% for preset in presets %}
+            <div class="entry">
+              <div class="entry-header">
+                <strong>{{ preset.name }}</strong>
+                <a class="pill-link" href="{{ preset.url }}">Load</a>
+              </div>
+              <p>
+                {{ preset.symbol }} · {{ preset.options_expiration }} expiry · {{ preset.target_label }}<br />
+                {{ preset.history_frequency }} history over {{ preset.history_period }} period window{% if preset.history_start_to_end %} · start-to-end moves{% endif %}
+              </p>
+              <div style="margin-top: 12px;">
+                <small>Saved {{ preset.created_at }}</small>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="muted">No presets saved yet. Save one from a symbol dashboard after tuning the inputs.</div>
+          {% endif %}
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel feature-card">
+          <span class="kicker">Current Scope</span>
+          <h3>Quote, history, and option setup</h3>
+          <p>
+            The web app currently covers the same three core tasks as the Slack version: check the
+            underlying, inspect threshold-based move history, and find weekly option candidates.
+          </p>
+        </article>
+
+        <article class="panel feature-card">
+          <span class="kicker">Guardrails</span>
+          <h3>Candidate quality is now visible</h3>
+          <p>
+            Option recommendations can now carry market-quality warnings so wide spreads, zero bids,
+            and thin open interest are harder to ignore.
+          </p>
+        </article>
+
+        <article class="panel feature-card">
+          <span class="kicker">JSON API</span>
+          <h3>Keep the backend reusable</h3>
+          <p>
+            Normalized endpoints remain available at <code>/api/quote</code>, <code>/api/history</code>,
+            and <code>/api/options</code> so Slack and future automations can reuse the same services.
+          </p>
+        </article>
+      </section>
+
+      <section class="grid" style="margin-top: 18px;">
+        <article class="panel meta-card">
+          <h3>Runtime</h3>
+          <p>FastAPI entrypoint: <code>pystonk.web_app:app</code></p>
+        </article>
+        <article class="panel meta-card">
+          <h3>Workspace DB</h3>
+          <p>Default path: <code>pystonk.sqlite3</code> or override with <code>PYSTONK_WEB_DB_PATH</code></p>
+        </article>
+        <article class="panel meta-card">
+          <h3>Credentials</h3>
+          <p>Set <code>PYSTONK_SCHWAB_KEY</code> and <code>PYSTONK_SCHWAB_SECRET</code> before live use.</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ symbol }} | PyStonk</title>
+    <style>
+      :root {
+        --shell: #f4ebd9;
+        --cloud: #fbf8f1;
+        --ink: #182127;
+        --ink-soft: #5b6670;
+        --teal: #0d6d65;
+        --teal-soft: rgba(13, 109, 101, 0.1);
+        --teal-deep: #084740;
+        --rust: #b7502c;
+        --rust-soft: rgba(183, 80, 44, 0.12);
+        --line: rgba(24, 33, 39, 0.12);
+        --shadow: 0 20px 56px rgba(24, 33, 39, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        background:
+          radial-gradient(circle at 8% 10%, rgba(183, 80, 44, 0.12), transparent 22%),
+          radial-gradient(circle at 90% 0%, rgba(13, 109, 101, 0.15), transparent 20%),
+          linear-gradient(180deg, #fcf8ef 0%, var(--shell) 100%);
+        min-height: 100vh;
+      }
+
+      main {
+        width: min(1260px, calc(100% - 28px));
+        margin: 0 auto;
+        padding: 26px 0 56px;
+      }
+
+      .topbar,
+      .entry-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .topbar {
+        margin-bottom: 16px;
+      }
+
+      .topbar a {
+        color: var(--ink-soft);
+        text-decoration: none;
+      }
+
+      .panel {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        box-shadow: var(--shadow);
+      }
+
+      .message,
+      .error {
+        margin-bottom: 18px;
+        padding: 18px 20px;
+        border-radius: 20px;
+      }
+
+      .message.notice {
+        background: var(--teal-soft);
+        border: 1px solid rgba(13, 109, 101, 0.18);
+        color: var(--teal-deep);
+      }
+
+      .message.error,
+      .warning,
+      .error {
+        background: var(--rust-soft);
+        border: 1px solid rgba(183, 80, 44, 0.18);
+      }
+
+      .hero {
+        padding: 26px;
+        margin-bottom: 18px;
+      }
+
+      .hero-grid,
+      .content-grid,
+      .sub-grid,
+      .callout-grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1.35fr 0.95fr;
+      }
+
+      .content-grid {
+        grid-template-columns: 0.95fr 1.15fr;
+      }
+
+      .sub-grid,
+      .callout-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .eyebrow,
+      .flag,
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+      }
+
+      .eyebrow {
+        padding: 6px 10px;
+        background: var(--teal-soft);
+        color: var(--teal);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      h1 {
+        margin: 14px 0 10px;
+        font-size: clamp(36px, 5vw, 62px);
+        line-height: 0.95;
+      }
+
+      h2,
+      h3 {
+        margin: 0 0 8px;
+      }
+
+      .subtitle,
+      .section p,
+      .workspace-copy,
+      .callout small,
+      .muted {
+        color: var(--ink-soft);
+        line-height: 1.6;
+      }
+
+      .subtitle {
+        max-width: 58ch;
+      }
+
+      .price-band {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .metric,
+      .callout,
+      .workspace-card,
+      .entry,
+      .section {
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(24, 33, 39, 0.04);
+      }
+
+      .metric {
+        padding: 16px;
+      }
+
+      .metric-label,
+      .callout-label,
+      label {
+        display: block;
+        color: var(--ink-soft);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .metric-label,
+      .callout-label {
+        margin-bottom: 8px;
+      }
+
+      .metric-value {
+        font-size: 28px;
+      }
+
+      .metric-subvalue {
+        margin-top: 6px;
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      .control-stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .workspace-card {
+        padding: 18px;
+      }
+
+      .workspace-card h3 {
+        margin-bottom: 6px;
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+      }
+
+      input,
+      select,
+      button,
+      .cta-link {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        font: inherit;
+      }
+
+      input,
+      select {
+        padding: 12px 14px;
+        background: rgba(255, 255, 255, 0.84);
+      }
+
+      button,
+      .cta-link {
+        padding: 13px 16px;
+        color: white;
+        background: linear-gradient(135deg, var(--ink) 0%, #31404b 100%);
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+      }
+
+      .inline-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      .checkbox-row input {
+        width: auto;
+        margin: 0;
+      }
+
+      .section {
+        padding: 22px;
+      }
+
+      .pill-row,
+      .quality-list,
+      .entry-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .pill {
+        padding: 9px 12px;
+        background: rgba(24, 33, 39, 0.05);
+        border: 1px solid var(--line);
+        font-size: 13px;
+      }
+
+      .warning {
+        margin-bottom: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+      }
+
+      .event-note {
+        margin-bottom: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(13, 109, 101, 0.08);
+        border: 1px solid rgba(13, 109, 101, 0.18);
+      }
+
+      .table-wrap {
+        overflow: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 11px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: 14px;
+        vertical-align: top;
+      }
+
+      th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ink-soft);
+      }
+
+      .highlight-row {
+        background: rgba(13, 109, 101, 0.08);
+      }
+
+      .flag {
+        padding: 5px 8px;
+        background: var(--teal-soft);
+        color: var(--teal);
+        font-size: 12px;
+      }
+
+      .callout {
+        padding: 16px;
+      }
+
+      .callout strong {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+
+      .quality-list {
+        margin-top: 10px;
+      }
+
+      .empty-state {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px dashed var(--line);
+        background: rgba(24, 33, 39, 0.03);
+      }
+
+      .entry-list {
+        display: grid;
+      }
+
+      .entry {
+        padding: 16px;
+      }
+
+      .entry strong {
+        font-size: 17px;
+      }
+
+      .entry-meta {
+        margin-top: 12px;
+      }
+
+      .mini-form {
+        display: inline-grid;
+      }
+
+      .mini-form button {
+        width: auto;
+        padding: 10px 12px;
+        border-radius: 12px;
+      }
+
+      @media (max-width: 1080px) {
+        .hero-grid,
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .price-band,
+        .sub-grid,
+        .callout-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .price-band,
+        .inline-grid,
+        .sub-grid,
+        .callout-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar,
+        .entry-meta {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="topbar">
+        <a href="/">← Back to launcher</a>
+        <span>JSON APIs remain available at <code>/api/*</code></span>
+      </div>
+
+      {% if workspace_notice %}
+      <section class="message notice panel">{{ workspace_notice }}</section>
+      {% endif %}
+
+      {% if workspace_error %}
+      <section class="message error panel">{{ workspace_error }}</section>
+      {% endif %}
+
+      {% if page_error %}
+      <section class="error panel">
+        <strong>Dashboard unavailable</strong>
+        <div style="margin-top: 6px;">{{ page_error }}</div>
+      </section>
+      {% endif %}
+
+      <section class="hero panel">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Symbol Dashboard</span>
+            <h1>{{ symbol }}</h1>
+            <p class="subtitle">
+              This page keeps the original PyStonk flow intact: inspect the underlying, review recent move
+              behavior, and screen option candidates for the current weekly setup.
+            </p>
+
+            {% if dashboard %}
+            <div class="price-band">
+              <div class="metric">
+                <span class="metric-label">Mark</span>
+                <div class="metric-value">${{ "%.2f"|format(dashboard.quote.price) }}</div>
+                <div class="metric-subvalue">Last: ${{ "%.2f"|format(dashboard.quote.last_price) }}</div>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Range</span>
+                <div class="metric-value">${{ "%.2f"|format(dashboard.quote.low_price) }}</div>
+                <div class="metric-subvalue">High: ${{ "%.2f"|format(dashboard.quote.high_price) }}</div>
+              </div>
+              <div class="metric">
+                <span class="metric-label">52 Week</span>
+                <div class="metric-value">${{ "%.2f"|format(dashboard.quote.low_price_52week) }}</div>
+                <div class="metric-subvalue">High: ${{ "%.2f"|format(dashboard.quote.high_price_52week) }}</div>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Bid / Ask</span>
+                <div class="metric-value">
+                  {% if dashboard.quote.bid_price is not none %}${{ "%.2f"|format(dashboard.quote.bid_price) }}{% else %}n/a{% endif %}
+                </div>
+                <div class="metric-subvalue">
+                  Ask:
+                  {% if dashboard.quote.ask_price is not none %}${{ "%.2f"|format(dashboard.quote.ask_price) }}{% else %}n/a{% endif %}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <aside class="control-stack">
+            <div class="workspace-card">
+              <h3>Tune Inputs</h3>
+              <p class="workspace-copy" style="margin-bottom: 14px;">Refresh the same dashboard with a different history threshold or option target.</p>
+
+              <form action="/symbol/{{ symbol }}" method="get">
+                <div class="inline-grid">
+                  <label>
+                    History Threshold %
+                    <input name="history_percent" type="number" step="0.01" value="{{ history_percent }}" />
+                  </label>
+                  <label>
+                    Option Target
+                    <input name="options_target" type="number" step="0.01" value="{{ options_target }}" />
+                  </label>
+                </div>
+
+                <div class="inline-grid">
+                  <label>
+                    History Frequency
+                    <select name="history_frequency">
+                      {% for frequency in history_frequencies %}
+                      <option value="{{ frequency }}" {% if history_frequency == frequency %}selected{% endif %}>{{ frequency }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                  <label>
+                    History Period
+                    <select name="history_period">
+                      {% for period in history_periods %}
+                      <option value="{{ period }}" {% if history_period == period %}selected{% endif %}>{{ period }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                </div>
+
+                <div class="inline-grid">
+                  <label>
+                    Option Expiration
+                    <select name="options_expiration">
+                      {% for expiration in option_expirations %}
+                      <option value="{{ expiration }}" {% if options_expiration == expiration %}selected{% endif %}>{{ expiration }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                  <label>
+                    Option Target Mode
+                    <select name="options_use_percent">
+                      <option value="false" {% if not options_use_percent %}selected{% endif %}>premium</option>
+                      <option value="true" {% if options_use_percent %}selected{% endif %}>percent distance</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label class="checkbox-row">
+                  <input name="history_start_to_end" type="checkbox" value="true" {% if history_start_to_end %}checked{% endif %} />
+                  Use interval start-to-end for percent moves
+                </label>
+
+                <button type="submit">Refresh Dashboard</button>
+              </form>
+            </div>
+
+            <div class="workspace-card">
+              <h3>Workspace</h3>
+              <p class="workspace-copy" style="margin-bottom: 14px;">
+                Save this symbol to the watchlist or store the current inputs as a reusable preset.
+              </p>
+
+              <form action="/watchlist" method="post">
+                <input type="hidden" name="symbol" value="{{ symbol }}" />
+                <input type="hidden" name="redirect_to" value="{{ current_target }}" />
+                <label>
+                  Watchlist Note
+                  <input name="note" value="{{ watchlist_entry.note if watchlist_entry else '' }}" placeholder="e.g. weekly put desk, roll candidate" />
+                </label>
+                <button type="submit">{% if watchlist_entry %}Update Watchlist Entry{% else %}Add To Watchlist{% endif %}</button>
+              </form>
+
+              {% if watchlist_entry %}
+              <form class="mini-form" action="/watchlist/remove" method="post" style="margin-top: 12px;">
+                <input type="hidden" name="symbol" value="{{ symbol }}" />
+                <input type="hidden" name="redirect_to" value="{{ current_target }}" />
+                <button type="submit">Remove From Watchlist</button>
+              </form>
+              {% endif %}
+
+              <hr style="margin: 18px 0; border: 0; border-top: 1px solid var(--line);" />
+
+              <form action="/presets" method="post">
+                <input type="hidden" name="symbol" value="{{ symbol }}" />
+                <input type="hidden" name="history_percent" value="{{ history_percent }}" />
+                <input type="hidden" name="history_frequency" value="{{ history_frequency }}" />
+                <input type="hidden" name="history_period" value="{{ history_period }}" />
+                <input type="hidden" name="history_start_to_end" value="{{ 'true' if history_start_to_end else 'false' }}" />
+                <input type="hidden" name="options_target" value="{{ options_target }}" />
+                <input type="hidden" name="options_expiration" value="{{ options_expiration }}" />
+                <input type="hidden" name="options_use_percent" value="{{ 'true' if options_use_percent else 'false' }}" />
+                <input type="hidden" name="redirect_to" value="{{ current_target }}" />
+                <label>
+                  Preset Name
+                  <input name="preset_name" value="{{ suggested_preset_name }}" required />
+                </label>
+                <button type="submit">Save Preset</button>
+              </form>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      {% if dashboard %}
+      <section class="content-grid">
+        <article class="panel section">
+          <h2>History</h2>
+          <p>Threshold-focused move history for the selected interval settings.</p>
+
+          <div class="pill-row" style="margin-bottom: 16px;">
+            <span class="pill">Threshold: {{ "%.2f"|format(dashboard.history.threshold_percent) }}%</span>
+            <span class="pill">Intervals: {{ dashboard.history.summary.interval_count }}</span>
+            <span class="pill">Exceeded: {{ dashboard.history.summary.intervals_exceeding_threshold }}</span>
+            <span class="pill">Rate: {{ "%.2f"|format(dashboard.history.summary.exceedance_rate) }}%</span>
+            <span class="pill">Prob. beyond threshold: {{ "%.2f"|format(dashboard.history.summary.probability_exceeding_threshold) }}%</span>
+          </div>
+
+          <div class="sub-grid" style="margin-bottom: 16px;">
+            <div class="entry">
+              <strong>Distribution snapshot</strong>
+              <p style="margin-top: 8px;">
+                Mean {{ "%.2f"|format(dashboard.history.summary.mean) }}% · Std {{ "%.2f"|format(dashboard.history.summary.std) }}%<br />
+                Min {{ "%.2f"|format(dashboard.history.summary.min) }}% · Max {{ "%.2f"|format(dashboard.history.summary.max) }}%
+              </p>
+            </div>
+            <div class="entry">
+              <strong>Shape</strong>
+              <p style="margin-top: 8px;">
+                Skew {{ "%.2f"|format(dashboard.history.summary.skew) }} · Kurtosis {{ "%.2f"|format(dashboard.history.summary.kurtosis) }}<br />
+                {% if history_start_to_end %}Using start-to-end percent moves.{% else %}Using interval high/low percent move buckets.{% endif %}
+              </p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Open</th>
+                  <th>Close</th>
+                  <th>% Move</th>
+                  <th>Volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in dashboard.history_rows %}
+                <tr>
+                  <td>{{ row.start_datetime[:10] }}</td>
+                  <td>${{ "%.2f"|format(row.open_price) }}</td>
+                  <td>${{ "%.2f"|format(row.close_price) }}</td>
+                  <td>{{ "%.2f"|format(row.percent_change) }}%</td>
+                  <td>{{ row.volume }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel section">
+          <h2>Option Setup</h2>
+          <p>Closest candidates for the selected target, with basic market-quality guardrails.</p>
+
+          {% if dashboard.options.event_risk %}
+          <div class="event-note">
+            <strong>Event risk status: {{ dashboard.options.event_risk.status }}</strong>
+            <div style="margin-top: 6px;">{{ dashboard.options.event_risk.message }}</div>
+          </div>
+          {% endif %}
+
+          {% for warning in dashboard.options.warnings %}
+          <div class="warning">{{ warning }}</div>
+          {% endfor %}
+
+          <div class="pill-row" style="margin-bottom: 16px;">
+            <span class="pill">Mode: {{ dashboard.options.target_mode }}</span>
+            <span class="pill">Target: {% if dashboard.options.target_mode == "premium" %}${{ "%.2f"|format(dashboard.options.target) }}{% else %}{{ "%.2f"|format(dashboard.options.target) }}%{% endif %}</span>
+            <span class="pill">Expiration: {{ dashboard.options.expiration }}</span>
+            <span class="pill">Expiry date: {{ dashboard.options.expiration_date }}</span>
+          </div>
+
+          <div class="callout-grid" style="margin-bottom: 16px;">
+            <div class="callout">
+              <span class="callout-label">Sell Put</span>
+              {% if dashboard.options.recommendations.sell.put %}
+              <strong>{{ dashboard.options.recommendations.sell.put.contract.symbol }}</strong>
+              <small>
+                Premium ${{ "%.2f"|format(dashboard.options.recommendations.sell.put.premium) }}<br />
+                Strike ${{ "%.2f"|format(dashboard.options.recommendations.sell.put.contract.strike_price) }}<br />
+                Distance {{ "%.2f"|format(dashboard.options.recommendations.sell.put.percent_change) }}%<br />
+                OI {{ dashboard.options.recommendations.sell.put.market_quality.open_interest }} · Spread ${{ "%.2f"|format(dashboard.options.recommendations.sell.put.market_quality.spread) }}
+              </small>
+              {% if dashboard.options.recommendations.sell.put.market_quality.flags %}
+              <div class="quality-list">
+                {% for flag in dashboard.options.recommendations.sell.put.market_quality.flags %}
+                <span class="flag">{{ flag }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+              {% else %}
+              <small>No matching sell put found.</small>
+              {% endif %}
+            </div>
+
+            <div class="callout">
+              <span class="callout-label">Sell Call</span>
+              {% if dashboard.options.recommendations.sell.call %}
+              <strong>{{ dashboard.options.recommendations.sell.call.contract.symbol }}</strong>
+              <small>
+                Premium ${{ "%.2f"|format(dashboard.options.recommendations.sell.call.premium) }}<br />
+                Strike ${{ "%.2f"|format(dashboard.options.recommendations.sell.call.contract.strike_price) }}<br />
+                Distance {{ "%.2f"|format(dashboard.options.recommendations.sell.call.percent_change) }}%<br />
+                OI {{ dashboard.options.recommendations.sell.call.market_quality.open_interest }} · Spread ${{ "%.2f"|format(dashboard.options.recommendations.sell.call.market_quality.spread) }}
+              </small>
+              {% if dashboard.options.recommendations.sell.call.market_quality.flags %}
+              <div class="quality-list">
+                {% for flag in dashboard.options.recommendations.sell.call.market_quality.flags %}
+                <span class="flag">{{ flag }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+              {% else %}
+              <small>No matching sell call found.</small>
+              {% endif %}
+            </div>
+
+            <div class="callout">
+              <span class="callout-label">Buy Put</span>
+              {% if dashboard.options.recommendations.buy.put %}
+              <strong>{{ dashboard.options.recommendations.buy.put.contract.symbol }}</strong>
+              <small>
+                Premium ${{ "%.2f"|format(dashboard.options.recommendations.buy.put.premium) }}<br />
+                Strike ${{ "%.2f"|format(dashboard.options.recommendations.buy.put.contract.strike_price) }}<br />
+                Distance {{ "%.2f"|format(dashboard.options.recommendations.buy.put.percent_change) }}%<br />
+                OI {{ dashboard.options.recommendations.buy.put.market_quality.open_interest }} · Spread ${{ "%.2f"|format(dashboard.options.recommendations.buy.put.market_quality.spread) }}
+              </small>
+              {% if dashboard.options.recommendations.buy.put.market_quality.flags %}
+              <div class="quality-list">
+                {% for flag in dashboard.options.recommendations.buy.put.market_quality.flags %}
+                <span class="flag">{{ flag }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+              {% else %}
+              <small>No matching buy put found.</small>
+              {% endif %}
+            </div>
+
+            <div class="callout">
+              <span class="callout-label">Buy Call</span>
+              {% if dashboard.options.recommendations.buy.call %}
+              <strong>{{ dashboard.options.recommendations.buy.call.contract.symbol }}</strong>
+              <small>
+                Premium ${{ "%.2f"|format(dashboard.options.recommendations.buy.call.premium) }}<br />
+                Strike ${{ "%.2f"|format(dashboard.options.recommendations.buy.call.contract.strike_price) }}<br />
+                Distance {{ "%.2f"|format(dashboard.options.recommendations.buy.call.percent_change) }}%<br />
+                OI {{ dashboard.options.recommendations.buy.call.market_quality.open_interest }} · Spread ${{ "%.2f"|format(dashboard.options.recommendations.buy.call.market_quality.spread) }}
+              </small>
+              {% if dashboard.options.recommendations.buy.call.market_quality.flags %}
+              <div class="quality-list">
+                {% for flag in dashboard.options.recommendations.buy.call.market_quality.flags %}
+                <span class="flag">{{ flag }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+              {% else %}
+              <small>No matching buy call found.</small>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Strike</th>
+                  <th>% Dist</th>
+                  <th>Call</th>
+                  <th>Put</th>
+                  <th>Flags</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in option_rows %}
+                <tr {% if row.is_highlighted %}class="highlight-row"{% endif %}>
+                  <td>${{ "%.2f"|format(row.strike_price) }}</td>
+                  <td>{{ "%.2f"|format(row.percent_change) }}%</td>
+                  <td>
+                    {{ row.call.symbol }}<br />
+                    Bid ${{ "%.2f"|format(row.call.bid) }} / Ask ${{ "%.2f"|format(row.call.ask) }}<br />
+                    Spread ${{ "%.2f"|format(row.call.spread) }} · OI {{ row.call.open_interest }}
+                  </td>
+                  <td>
+                    {{ row.put.symbol }}<br />
+                    Bid ${{ "%.2f"|format(row.put.bid) }} / Ask ${{ "%.2f"|format(row.put.ask) }}<br />
+                    Spread ${{ "%.2f"|format(row.put.spread) }} · OI {{ row.put.open_interest }}
+                  </td>
+                  <td>
+                    {% if row.flag_label %}
+                    <span class="flag">{{ row.flag_label }}</span>
+                    {% else %}
+                    <span class="muted">Nearby chain</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel section" style="margin-top: 18px;">
+        <h2>Saved Presets For {{ symbol }}</h2>
+        <p>Reuse the same history and option inputs when you want to re-check this name quickly.</p>
+
+        {% if symbol_presets %}
+        <div class="entry-list" style="margin-top: 16px;">
+          {% for preset in symbol_presets %}
+          <div class="entry">
+            <strong>{{ preset.name }}</strong>
+            <p style="margin-top: 8px;">
+              {{ preset.options_expiration }} expiry · {{ preset.target_label }}<br />
+              {{ preset.history_frequency }} history over {{ preset.history_period }} period window{% if preset.history_start_to_end %} · start-to-end moves{% endif %}
+            </p>
+            <div class="entry-meta">
+              <small>Saved {{ preset.created_at }}</small>
+              <a class="cta-link" href="{{ preset.url }}" style="width: auto;">Load Preset</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="margin-top: 16px;">No presets saved for this symbol yet.</div>
+        {% endif %}
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
