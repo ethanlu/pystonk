@@ -47,7 +47,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3'
     ],
-    python_requires='>=3.10',
+    python_requires='>=3.13',
     packages=find_packages(),
     package_data={'pystonk': ['conf/*.conf']},
     install_requires=load_requirements(),

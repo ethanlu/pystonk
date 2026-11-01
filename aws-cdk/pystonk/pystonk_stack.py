@@ -21,7 +21,7 @@ class PyStonkStack(Stack):
             case a if a in ('arm64'): architecture = _lambda.Architecture.ARM_64
             case _: raise Exception("Unrecognized machine architecture")
 
-        runtime_python = _lambda.Runtime.PYTHON_3_10
+        runtime_python = _lambda.Runtime.PYTHON_3_13
 
         # required environment variables
         environment_variables = {
