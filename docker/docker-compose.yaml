@@ -18,9 +18,19 @@ services:
       - ../setup.py:/opt/app/setup.py
       - ../pystonk:/opt/app/pystonk
       - ../tests:/opt/app/tests
+  nginx:
+    image: nginx:latest
+    container_name: reverse-proxy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../pystonk/images/:/var/www/html:ro
+    restart: unless-stopped
   ngrok:
-    image: ngrok/ngrok:alpine
+    image: ngrok/ngrok:latest
     container_name: ngrok
     env_file:
       - .env
-    command: [ "http", "host.docker.internal:3000" ]
+    command: [ "http", "host.docker.internal:8080", "--url=https://${NGROK_DOMAIN}" ]
+    restart: unless-stopped

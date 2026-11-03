@@ -1,0 +1,6 @@
+# this folder only used to run nginx image server when running pystonk locally. this folder serves as temporary image storage location
+# so, ignore all files
+*
+
+# excepet for this .gitignore file
+!.gitignore
