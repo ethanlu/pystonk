@@ -24,7 +24,6 @@ def load_requirements():
             "prettytable",
             "pyhocon",
             "requests",
-            "scipy",
             "slack_bolt",
             "termcolor",
             "wheel",
