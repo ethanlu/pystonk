@@ -11,7 +11,6 @@ from pystonk.views.OptionsChainView import OptionsChainView
 from argparse import Namespace
 from calendar import monthrange
 from datetime import date, timedelta
-from typing import Type
 
 import re
 
@@ -66,7 +65,7 @@ class OptionsChainCommand(Command):
     def parser(self) -> CustomArgParser:
         return self._parser
 
-    def process(self, args: Namespace) -> Type[View]:
+    def process(self, args: Namespace) -> View:
         symbol = args.symbol.upper()
         target = abs(round(args.target, 2))
         use_percent = args.percent

@@ -3,14 +3,14 @@ from pystonk.api.PriceHistoryApi import PriceHistoryApi
 from pystonk.api.QuoteApi import QuoteApi
 from pystonk.commands import Command
 from pystonk.models.PriceHistory import PriceHistory
-from pystonk.models.PriceHistoryEstimate import PriceHistoryEstimate
+from pystonk.models.PriceHistoryAnalysis import PriceHistoryAnalysis
 from pystonk.utils.CustomArgParser import CustomArgParser
+from pystonk.utils.ImageWriter import ImageWriter
 from pystonk.views import View
 from pystonk.views.ErrorView import ErrorView
 from pystonk.views.PriceHistoryView import PriceHistoryView
 
 from argparse import Namespace
-from typing import Type
 
 import re
 
@@ -77,7 +77,7 @@ class PriceHistoryCommand(Command):
     def parser(self) -> CustomArgParser:
         return self._parser
 
-    def process(self, args: Namespace) -> Type[View]:
+    def process(self, args: Namespace) -> View:
         symbol = args.symbol.upper()
         percent = round(args.percent, 2)
         frequency_type = FrequencyType(args.frequency)
@@ -100,12 +100,25 @@ class PriceHistoryCommand(Command):
                 frequency=1
             ), start_to_end)
 
+            pa = PriceHistoryAnalysis(price_history.percent_change_intervals())
+
+            # save charts to location for retreival in message later
+
+            histogram_url = ImageWriter.write(f"histogram-{symbol}-{percent}-{frequency_type}-{period}-{start_to_end}", pa.histogram())
+            self.logger.debug(f"histogram image written to : {histogram_url}")
+            qq_url = None
+            if args.verbose:
+                qq_url = ImageWriter.write(f"qq-{symbol}-{percent}-{frequency_type}-{period}-{start_to_end}", pa.qq())
+                self.logger.debug(f"qq image written to : {qq_url}")
+
             return PriceHistoryView(
                 symbol=symbol,
                 percent=percent,
                 frequency_type=frequency_type,
                 price_history=price_history,
-                price_history_estimate=PriceHistoryEstimate(price_history.percent_change_intervals())
+                price_history_analysis=PriceHistoryAnalysis(price_history.percent_change_intervals()),
+                histogram_url=histogram_url,
+                qq_url=qq_url
             )
         else:
             return ErrorView(f"{symbol} is not found...")

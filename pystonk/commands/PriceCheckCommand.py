@@ -7,7 +7,6 @@ from pystonk.views.ErrorView import ErrorView
 from pystonk.views.PriceCheckView import PriceCheckView
 
 from argparse import Namespace
-from typing import Type
 
 import re
 
@@ -39,7 +38,7 @@ class PriceCheckCommand(Command):
     def parser(self) -> CustomArgParser:
         return self._parser
 
-    def process(self, args: Namespace) -> Type[View]:
+    def process(self, args: Namespace) -> View:
         symbol = args.symbol.upper()
 
         quote = self._quote_api.get_quote(symbol)
