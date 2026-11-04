@@ -8,9 +8,6 @@ class View(ABC):
     SLACK_PAGINATE_CHAR_LIMIT = 2600
     SLACK_OK_EMOJI = configuration['slack']['emojis']['success'].split(' ')
     SLACK_FAIL_EMOJI = configuration['slack']['emojis']['fail'].split(' ')
-    CHART_WIDTH = 600
-    CHART_HEIGHT = 400
-    CHAR_PIXEL_RATIO = 2
 
     def __init__(self):
         self._verbose = False

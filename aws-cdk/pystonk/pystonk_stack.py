@@ -1,10 +1,11 @@
-import os
-import platform
-
-from aws_cdk import BundlingOptions, Stack, Duration, aws_lambda as _lambda, aws_iam as _iam
+from aws_cdk import BundlingOptions, Stack, Duration, aws_lambda as _lambda, aws_iam as _iam, aws_s3 as _s3, RemovalPolicy
 from constructs import Construct
 from os import path
 from dotenv import load_dotenv
+
+import hashlib
+import os
+import platform
 
 
 load_dotenv(path.abspath(path.dirname(__file__)) + "/../")
@@ -38,6 +39,10 @@ class PyStonkStack(Stack):
             environment_variables['PYSTONK_SLACK_SUCCESS_EMOJIS'] = os.getenv('PYSTONK_SLACK_SUCCESS_EMOJIS')
         if os.getenv('PYSTONK_SLACK_FAIL_EMOJIS'):
             environment_variables['PYSTONK_SLACK_FAIL_EMOJIS'] = os.getenv('PYSTONK_SLACK_FAIL_EMOJIS')
+
+        h = hashlib.sha256((os.getenv('PYSTONK_SLACK_SECRET') + os.getenv('PYSTONK_SCHWAB_SECRET')).encode('utf-8'))
+        bucket_hash = h.hexdigest()[:8]
+        environment_variables["PYSTONK_AWS_S3_HASH"] = bucket_hash
 
         # main lambda installs everything
         responder_lambda = _lambda.Function(self, 'PyStonkResponder',
@@ -92,3 +97,23 @@ class PyStonkStack(Stack):
                 resources=["*"]
             )
         )
+
+        # s3 bucket for storing/serving generated charts
+        image_bucket = _s3.Bucket(self, 'PyStonkS3',
+                   bucket_name=f"pystonk-images-{bucket_hash}",
+                   block_public_access=_s3.BlockPublicAccess(
+                       block_public_acls=True,
+                       block_public_policy=False,
+                       ignore_public_acls=True,
+                       restrict_public_buckets=False
+                   ),
+                   public_read_access=True,
+                   encryption=_s3.BucketEncryption.S3_MANAGED,
+                   lifecycle_rules=[_s3.LifecycleRule(
+                       id="DeleteAfterThreeDays",
+                       expiration=Duration.days(3)
+                   )],
+                   removal_policy=RemovalPolicy.DESTROY,
+                   versioned=False
+                   )
+        image_bucket.grant_write(responder_lambda)

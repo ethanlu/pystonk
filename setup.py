@@ -19,12 +19,11 @@ def load_requirements():
         #  used for all other situations
         return [
             "boto3",
+            "matplotlib",
             "numpy",
             "prettytable",
             "pyhocon",
-            "quickchart.io",
             "requests",
-            "scipy",
             "slack_bolt",
             "termcolor",
             "wheel",
@@ -34,7 +33,7 @@ def load_requirements():
 
 setup(
     name="pystonk",
-    version="2.2.0",
+    version="2.3.0",
     author="Ethan Lu",
     author_email="fang.lu@gmail.com",
     description="Python Stocks & Options Tool",

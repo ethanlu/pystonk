@@ -1,9 +1,7 @@
 from pystonk.api.Types import FrequencyType
 from pystonk.models.PriceHistory import PriceHistory
-from pystonk.models.PriceHistoryEstimate import PriceHistoryEstimate
+from pystonk.models.PriceHistoryAnalysis import PriceHistoryAnalysis
 from pystonk.views import View
-
-from quickchart import QuickChart
 from prettytable import PrettyTable
 from typing import Dict, List
 
@@ -18,31 +16,21 @@ class PriceHistoryView(View):
     }
     TRUNCATED_HISTORY_LIMIT = 10
 
-    def __init__(self, symbol: str, percent: float, frequency_type: FrequencyType, price_history: PriceHistory, price_history_estimate: PriceHistoryEstimate):
+    def __init__(self, symbol: str, percent: float, frequency_type: FrequencyType, price_history: PriceHistory, price_history_analysis: PriceHistoryAnalysis, histogram_url: str, qq_url: str = None):
         super().__init__()
 
         self._symbol = symbol
         self._percent = percent
         self._price_history = price_history
-        self._price_history_estimate = price_history_estimate
+        self._price_history_analysis = price_history_analysis
+        self._histogram_url = histogram_url
+        self._qq_url = qq_url
 
         self._frequency_type = frequency_type
         self._interval_label = self.INTERVAL_FREQUENCY_TYPE_MAP[self._frequency_type.value]
 
         # history table
         self._t = PrettyTable()
-
-        # histogram
-        self._hc = QuickChart()
-        self._hc.width = self.CHART_WIDTH
-        self._hc.height = self.CHART_HEIGHT
-        self._hc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
-
-        # probability density
-        self._pdc = QuickChart()
-        self._pdc.width = self.CHART_WIDTH
-        self._pdc.height = self.CHART_HEIGHT
-        self._pdc.device_pixel_ratio = self.CHAR_PIXEL_RATIO
 
     def _build_history(self) -> List[Dict]:
         self._t.field_names = (' ', self._interval_label.capitalize(), 'Open', 'Close', '% Change')
@@ -98,96 +86,39 @@ class PriceHistoryView(View):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*Percent Change Min*: `{self._price_history_estimate.min()}` \n" +
-                            f"*Percent Change Max*: `{self._price_history_estimate.max()}` \n" +
-                            f"*Percent Change Mean*: `{self._price_history_estimate.mean()}` \n" +
-                            f"*Percent Change STD*: `{self._price_history_estimate.std()}` \n" +
-                            f"*Percent Change Skewness*: `{self._price_history_estimate.skew()}` \n" +
-                            f"*Percent Change Kurtosis*: `{self._price_history_estimate.kurtosis()}` \n" +
-                            f"*Probability Exceeding Percent Threshold*: `{self._price_history_estimate.percent_probability(self._percent)}%`"
+                    "text": f"*Percent Change Min*: `{self._price_history_analysis.min()}` \n" +
+                            f"*Percent Change Max*: `{self._price_history_analysis.max()}` \n" +
+                            f"*Percent Change Mean*: `{self._price_history_analysis.mean()}` \n" +
+                            f"*Percent Change STD*: `{self._price_history_analysis.std()}` \n" +
+                            f"*Percent Change Skewness*: `{self._price_history_analysis.skew()}` \n" +
+                            f"*Percent Change Kurtosis*: `{self._price_history_analysis.kurtosis()}` \n" +
+                            f"*Probability Exceeding Percent Threshold*: `{self._price_history_analysis.percent_probability(self._percent)}%`"
                 }
             }
         ]
 
-        if self.verbose:
-            self._hc.config = {
-                "type": "bar",
-                "data": {
-                    "labels": self._price_history_estimate.histogram_bins(),
-                    "datasets": [
-                        {
-                            "label": f"{self._frequency_type.value.capitalize()} Price Change (+/-{self._price_history_estimate.histogram_bins_interval()})",
-                            "data": self._price_history_estimate.histogram()
-                        }
-                    ]
+        response += [
+            {
+                "type": "image",
+                "title": {
+                    "type": "plain_text",
+                    "text": f"{self._frequency_type.value.capitalize()} Price Change Histogram With Fit"
                 },
-                "options": {
-                    "scales": {
-                        "xAxes": [{
-                            "scaleLabel": {
-                                "display": True,
-                                "labelString": "Price Change Percent"
-                            }
-                        }],
-                        "yAxes": [{
-                            "ticks": {
-                                "min": 0
-                            },
-                            "scaleLabel": {
-                                "display": True,
-                                "labelString": f"Number Of {self._interval_label.capitalize()}"
-                            }
-                        }]
-                    }
-                }
+                "image_url": f"{self._histogram_url}",
+                "alt_text": "Price Change Histogram With Fit"
             }
+        ]
 
-            self._pdc.config = {
-                "type": "scatter",
-                "data": {
-                    "datasets": [
-                        {
-                            "label": f"{self._frequency_type.value.capitalize()} Probability Density",
-                            "data": [{"x": x, "y": y} for (x, y) in zip(*self._price_history_estimate.pdf())]
-                        }
-                    ]
-                },
-                "options": {
-                    "scales": {
-                        "xAxes": [{
-                            "scaleLabel": {
-                                "display": True,
-                                "labelString": "Price Change Percent"
-                            }
-                        }],
-                        "yAxes": [{
-                            "scaleLabel": {
-                                "display": True,
-                                "labelString": "Probability"
-                            }
-                        }]
-                    }
-                }
-            }
-
+        if self.verbose and self._qq_url:
             response += [
                 {
                     "type": "image",
                     "title": {
                         "type": "plain_text",
-                        "text": f"{self._frequency_type.value.capitalize()} Price Change Histogram"
+                        "text": f"QQ Plot"
                     },
-                    "image_url": self._hc.get_short_url(),
-                    "alt_text": "Price Change Histogram"
-                },
-                {
-                    "type": "image",
-                    "title": {
-                        "type": "plain_text",
-                        "text": f"{self._frequency_type.value.capitalize()} Probability Density"
-                    },
-                    "image_url": self._pdc.get_short_url(),
-                    "alt_text": "Probability Density"
+                    "image_url": f"{self._qq_url}",
+                    "alt_text": "QQ Plot"
                 }
             ]
 
