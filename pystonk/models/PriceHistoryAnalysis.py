@@ -17,6 +17,8 @@ class PriceHistoryAnalysis(object):
         return 0.5 * (1.0 + math.erf(((x - loc) / scale) / math.sqrt(2.0)))
 
     def _normal_pdf(self, x: float, loc: float, scale: float) -> float:
+        if scale <= 0.0:
+            scale = abs(scale)
         variance = scale ** 2
         denominator = math.sqrt(2 * math.pi * variance)
         exponent = -((x - loc) ** 2) / (2 * variance)
@@ -232,7 +234,6 @@ class PriceHistoryAnalysis(object):
         # generate qq data
         theoretical_quantiles, ordered_samples = self._probplot()
         slope, intercept, r = self._calculate_least_squares(theoretical_quantiles, ordered_samples)
-        qq_data = np.column_stack((theoretical_quantiles, ordered_samples))
 
         # fitted line's y-values for each theoretical quantile
         line_y = [slope * x + intercept for x in theoretical_quantiles]

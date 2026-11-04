@@ -87,7 +87,7 @@ class PriceHistoryCommand(Command):
         if self._quote_api.get_quote(symbol):
             period_type = PeriodType.YEAR
             if frequency_type == FrequencyType.DAILY:
-                # switch to month period type if fequency is daily
+                # switch to month period type if frequency is daily
                 period_type = PeriodType.MONTH
                 # period of 5 is only valid for weekly and monthly frequencies. for daily, period of 5 must be 6
                 period = period if period != 5 else 6
@@ -102,8 +102,7 @@ class PriceHistoryCommand(Command):
 
             pa = PriceHistoryAnalysis(price_history.percent_change_intervals())
 
-            # save charts to location for retreival in message later
-
+            # save charts to location for retrieval in message later
             histogram_url = ImageWriter.write(f"histogram-{symbol}-{percent}-{frequency_type}-{period}-{start_to_end}", pa.histogram())
             self.logger.debug(f"histogram image written to : {histogram_url}")
             qq_url = None

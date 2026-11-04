@@ -60,4 +60,4 @@ class ApiTest(TestCase):
         o = Api('some key', 'some secret')
         with self.assertRaises(ValueError):
             o.get_access_token()
-        self.assertTrue("get_access_token failed to raise expected ValueError when access token is not found")
+            self.assertFalse("get_access_token failed to raise expected ValueError when access token is not found")
